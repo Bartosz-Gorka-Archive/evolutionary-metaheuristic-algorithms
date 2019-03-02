@@ -67,7 +67,10 @@ public class PrimSolver {
                 PointsPath p = possiblePaths.get(i);
 
                 // If start or end location in already visited - use it
-                if (visitedIndexes.contains(p.getStartIndex()) || visitedIndexes.contains(p.getEndIndex())) {
+                boolean containsFirst = visitedIndexes.contains(p.getStartIndex());
+                boolean containsEnd = visitedIndexes.contains(p.getEndIndex());
+
+                if ((containsFirst && !containsEnd) || (!containsFirst && containsEnd)) {
                     point = possiblePaths.remove(i);
                     this.path.add(point);
                     visitedIndexes.add(point.getStartIndex());
