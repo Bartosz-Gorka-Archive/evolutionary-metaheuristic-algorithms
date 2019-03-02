@@ -22,6 +22,10 @@ public class Main extends Application {
         InputInstance inputInstance = new InputInstance(distanceMatrix);
         inputInstance.setGroupNumber(10);
 
+        PrimSolver primSolver = new PrimSolver();
+        int[] indexes = {0, 1, 2, 3, 4};
+        primSolver.construct(indexes, distanceMatrix);
+
         new Drawer().drawInputInstance(inputInstance, primaryStage);
     }
 }
