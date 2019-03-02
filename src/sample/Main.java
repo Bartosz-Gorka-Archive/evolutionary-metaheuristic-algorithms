@@ -20,12 +20,19 @@ public class Main extends Application {
         double[][] distanceMatrix = euclideanDistance.calculateDistanceMatrix(coordinates);
 
         InputInstance inputInstance = new InputInstance(distanceMatrix);
+        inputInstance.setPoints(coordinates);
         inputInstance.setGroupNumber(10);
 
         PrimSolver primSolver = new PrimSolver();
-        int[] indexes = {0, 1, 2, 3, 4};
+
+        // Construct single MST
+        int[] indexes = new int[coordinates.size()];
+        for (int i = 0; i < indexes.length; i++) {
+            indexes[i] = i;
+        }
         primSolver.construct(indexes, distanceMatrix);
 
-        new Drawer().drawInputInstance(inputInstance, primaryStage);
+        // Draw solution as a graph
+        new Drawer().drawInputInstance(primaryStage, inputInstance, primSolver);
     }
 }

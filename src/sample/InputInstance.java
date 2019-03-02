@@ -1,8 +1,11 @@
 package sample;
 
+import java.util.ArrayList;
+
 public class InputInstance {
     private int groupNumber;
     private double[][] distanceMatrix;
+    private ArrayList<PointCoordinates> points;
 
     /**
      * Create new instance.
@@ -21,5 +24,25 @@ public class InputInstance {
      */
     public void setGroupNumber(int groupNumber) {
         this.groupNumber = groupNumber;
+    }
+
+
+    /**
+     * Set points array in instance state
+     *
+     * @param coordinates List of points' coordinates
+     */
+    public void setPoints(ArrayList<PointCoordinates> coordinates) {
+        this.points = (ArrayList<PointCoordinates>) coordinates.clone();
+    }
+
+    /**
+     * Get point by index value
+     *
+     * @param index Point index
+     * @return Point coordinates
+     */
+    public PointCoordinates getPoint(int index) {
+        return this.points.get(index);
     }
 }
