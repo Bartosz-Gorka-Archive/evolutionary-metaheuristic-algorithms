@@ -40,14 +40,29 @@ public class PointsPath implements Comparable<PointsPath> {
         return (int) ((this.penalties - object.penalties) * 1_000);
     }
 
+    /**
+     * Get start point index
+     *
+     * @return Index
+     */
     public int getStartIndex() {
         return this.startIndex;
     }
 
+    /**
+     * Get end point index
+     *
+     * @return Index
+     */
     public int getEndIndex() {
         return this.endIndex;
     }
 
+    /**
+     * Get distance as a penalties
+     *
+     * @return Distance value
+     */
     public double getPenalties() {
         return penalties;
     }

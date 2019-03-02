@@ -7,24 +7,36 @@ import javafx.scene.shape.MoveTo;
 import javafx.scene.shape.Path;
 import javafx.stage.Stage;
 
-import java.util.ArrayList;
-import java.util.List;
-
 public class Drawer {
-    public void drawInputInstance(InputInstance inputInstance, Stage primaryStage) {
+
+    /**
+     * Draw instance as a graph
+     *
+     * @param primaryStage  Stage
+     * @param inputInstance Instance record
+     * @param primSolver    PRIM's solution
+     */
+    public void drawInputInstance(Stage primaryStage, InputInstance inputInstance, PrimSolver primSolver) {
         Path path = new Path();
-        MoveTo moveTo = new MoveTo(100, 100);
-        List<LineTo> line5 = new ArrayList<>();
-        line5.add(new LineTo(24, 11));
-        line5.add(new LineTo(14, 14));
-        line5.add(new LineTo(111, 4));
+        path.setSmooth(true);
 
-        path.getElements().add(moveTo);
-        path.getElements().addAll(line5);
+        // Draw lines on the graph
+        for (PointsPath route : primSolver.getPath()) {
+            PointCoordinates startPoint = inputInstance.getPoint(route.getStartIndex());
+            PointCoordinates endPoint = inputInstance.getPoint(route.getEndIndex());
+
+            // Move to start X, start Y
+            path.getElements().add(new MoveTo(startPoint.getX() * 2 + 20, startPoint.getY() * 2 + 20));
+
+            // Add line to end X, end Y
+            path.getElements().add(new LineTo(endPoint.getX() * 2 + 20, endPoint.getY() * 2 + 20));
+        }
+
+        // Prepare scene
         Group root = new Group(path);
-        Scene scene = new Scene(root, 600, 300);
+        Scene scene = new Scene(root, 800, 600);
 
-        primaryStage.setTitle("Drawing points connection");
+        primaryStage.setTitle("Points connections");
         primaryStage.setScene(scene);
         primaryStage.show();
     }
