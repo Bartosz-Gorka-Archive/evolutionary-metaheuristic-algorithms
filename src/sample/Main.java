@@ -32,6 +32,6 @@ public class Main extends Application {
         primSolver.construct(indexes, distanceMatrix);
 
         // Draw solution as a graph
-        new Drawer().drawInputInstance(primaryStage, inputInstance, primSolver);
+        new Drawer().drawInputInstance(primaryStage, coordinates, inputInstance, primSolver);
     }
 }
