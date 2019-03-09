@@ -3,36 +3,24 @@ package sample;
 import java.util.ArrayList;
 
 public class InputInstance {
-    private int groupNumber;
+    private int instanceNo;
+    private PointCoordinates startPoint;
     private double[][] distanceMatrix;
     private ArrayList<PointCoordinates> points;
 
     /**
      * Create new instance.
-     * Distance matrix will be clone to prevent changes in original matrix.
+     * Distance matrix and points will be clone to prevent changes in original matrixes.
      *
-     * @param matrix Matrix of distances between points
+     * @param instanceNo  Number of instance
+     * @param startPoint  Start point
+     * @param matrix      Distance matrix
+     * @param coordinates Coordinates list
      */
-    public InputInstance(double[][] matrix) {
+    public InputInstance(int instanceNo, PointCoordinates startPoint, double[][] matrix, ArrayList<PointCoordinates> coordinates) {
+        this.instanceNo = instanceNo;
+        this.startPoint = startPoint;
         this.distanceMatrix = matrix.clone();
-    }
-
-    /**
-     * Set number of groups in instance
-     *
-     * @param groupNumber Number of groups
-     */
-    public void setGroupNumber(int groupNumber) {
-        this.groupNumber = groupNumber;
-    }
-
-
-    /**
-     * Set points array in instance state
-     *
-     * @param coordinates List of points' coordinates
-     */
-    public void setPoints(ArrayList<PointCoordinates> coordinates) {
         this.points = (ArrayList<PointCoordinates>) coordinates.clone();
     }
 
@@ -44,5 +32,11 @@ public class InputInstance {
      */
     public PointCoordinates getPoint(int index) {
         return this.points.get(index);
+    }
+
+    @Override
+    public String toString() {
+        return "Instance No: " + this.instanceNo + " with start point = "
+                + this.startPoint.getX() + "," + this.startPoint.getY();
     }
 }
