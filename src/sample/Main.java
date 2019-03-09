@@ -19,9 +19,8 @@ public class Main extends Application {
         EuclideanDistance euclideanDistance = new EuclideanDistance();
         double[][] distanceMatrix = euclideanDistance.calculateDistanceMatrix(coordinates);
 
-        InputInstance inputInstance = new InputInstance(distanceMatrix);
-        inputInstance.setPoints(coordinates);
-        inputInstance.setGroupNumber(10);
+        StartPointAssigner assigner = new StartPointAssigner(10, coordinates, distanceMatrix);
+        InputInstance inputInstance = assigner.prepareRandomAssign().get(0);
 
         PrimSolver primSolver = new PrimSolver();
 
