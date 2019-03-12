@@ -49,11 +49,6 @@ public class PrimSolver {
         // Order by min distance first
         Collections.sort(possiblePaths);
 
-        // TODO debug only
-        for (PointsPath p : possiblePaths) {
-            System.out.println(p.toString());
-        }
-
         // Add first point to path list
         PointsPath point = possiblePaths.remove(0);
         this.path.add(point);
@@ -83,12 +78,6 @@ public class PrimSolver {
             }
         }
 
-        // TODO debug only
-        System.out.println("----- PATH -----");
-        for (PointsPath p : this.path) {
-            System.out.println(p.toString());
-        }
-
         // Calculate penalties
         this.calculatePenalties();
     }
@@ -96,7 +85,7 @@ public class PrimSolver {
     /**
      * Calculate sum of penalties and store it in object's state
      */
-    private void calculatePenalties() {
+    public void calculatePenalties() {
         this.penalties = 0.0;
         for (PointsPath point : this.path) {
             this.penalties += point.getPenalties();
