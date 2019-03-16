@@ -3,35 +3,51 @@ package sample;
 import javafx.application.Application;
 import javafx.stage.Stage;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.ListIterator;
+import java.util.*;
 
-public class Main extends Application {
+public class Main {
+// public class Main extends Application {
     private final static int GROUPS = 10;
 
     public static void main(String[] args) {
-        launch(args);
-    }
+//        launch(args);
+//    }
 
-    @Override
-    public void start(Stage primaryStage) {
+//    @Override
+//    public void start(Stage primaryStage) {
         Reader reader = new Reader();
         ArrayList<PointCoordinates> coordinates = reader.readInstance("objects.data");
 
         EuclideanDistance euclideanDistance = new EuclideanDistance();
         double[][] distanceMatrix = euclideanDistance.calculateDistanceMatrix(coordinates);
 
+        // BEGIN Random start indexes
+        HashSet<Integer> startIndexesList = new HashSet<>();
+        int totalElementsLength = coordinates.size();
+        Random random = new Random();
+
+        // Generate randomized indexes of start points
+        while (startIndexesList.size() < GROUPS) {
+            startIndexesList.add(random.nextInt(totalElementsLength));
+        }
+
+        // BEGIN k-means with static center
+
+
+
 //        int[] startPoints = {0, 1, 2};
-//        ArrayList<Integer> indexes = new ArrayList<>();
+//        ArrayList<Integer> startIndexes = new ArrayList<>();
 //        HashMap<Integer, HashSet<Integer>> groups = new HashMap<>();
 //        for (int i : startPoints) {
-//            indexes.add(i);
+//            startIndexes.add(i);
 //            HashSet<Integer> hs = new HashSet<>();
 //            hs.add(i);
 //            groups.put(i, hs);
 //        }
-//
+
+        // Copy distance array to enable modifications
+        // TODO
+
 //        for (int i = 0; i < distanceMatrix.length; i++) {
 //            int min = 0;
 //            double dist = Integer.MAX_VALUE;
@@ -46,9 +62,15 @@ public class Main extends Application {
 //            groups.replace(min, var);
 //        }
 
+        // For each group - recalculate center
+        // TODO
 
-        StartPointAssigner assigner = new StartPointAssigner(GROUPS, coordinates, distanceMatrix);
-        InputInstance inputInstance = assigner.prepareRandomAssign().get(0);
+        // If assignation element to group changed - run next loop
+        // TODO
+
+
+//        StartPointAssigner assigner = new StartPointAssigner(GROUPS, coordinates, distanceMatrix);
+//        InputInstance inputInstance = assigner.prepareRandomAssign().get(0);
 
         PrimSolver primSolver = new PrimSolver();
 
@@ -79,6 +101,6 @@ public class Main extends Application {
         System.out.println(GROUPS + " groups with penalties = " + primSolver.getPenalties());
 
         // Draw solution as a graph
-        new Drawer().drawInputInstance(primaryStage, coordinates, inputInstance, primSolver);
+//        new Drawer().drawInputInstance(primaryStage, coordinates, inputInstance, primSolver);
     }
 }
