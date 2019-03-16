@@ -1,5 +1,6 @@
 package sample;
 
+import com.sun.tools.javac.util.ArrayUtils;
 import javafx.application.Application;
 import javafx.stage.Stage;
 
@@ -21,7 +22,7 @@ public class Main {
         EuclideanDistance euclideanDistance = new EuclideanDistance();
         double[][] distanceMatrix = euclideanDistance.calculateDistanceMatrix(coordinates);
 
-        // BEGIN Random start indexes
+        // Random start indexes
         HashSet<Integer> startIndexesList = new HashSet<>();
         int totalElementsLength = coordinates.size();
         Random random = new Random();
@@ -31,9 +32,43 @@ public class Main {
             startIndexesList.add(random.nextInt(totalElementsLength));
         }
 
-        // BEGIN k-means with static center
+        // k-means with static center
+        HashMap<Integer, HashSet<Integer>> elementsWithAssigmentToGroups = new HashMap<>();
 
+        // Initialize groups
+        for (int index : startIndexesList) {
+            elementsWithAssigmentToGroups.put(index, new HashSet<>());
+        }
 
+        // Assign each point to group
+        for (PointCoordinates point : coordinates) {
+            int ID = point.getID();
+            int selectedGroupIndex = 0;
+            double minDistanceValue = Double.MAX_VALUE;
+
+            for (int centerPointIndex : startIndexesList) {
+                // Get distance from array
+                double distance = distanceMatrix[centerPointIndex][ID];
+
+                // Check distance is smaller than current stored - if yes => update index
+                if (distance < minDistanceValue) {
+                    minDistanceValue = distance;
+                    selectedGroupIndex = centerPointIndex;
+                }
+            }
+
+            // Add point to selected group
+            elementsWithAssigmentToGroups.get(selectedGroupIndex).add(ID);
+        }
+
+        // Calculate sum of MSTs
+        double sumOfPenalties = 0.0;
+        for (Map.Entry<Integer, HashSet<Integer>> group : elementsWithAssigmentToGroups.entrySet()) {
+            PrimSolver solver = new PrimSolver();
+            solver.construct(group.getValue().stream().mapToInt(Integer::intValue).toArray(), distanceMatrix);
+            sumOfPenalties += solver.getPenalties();
+        }
+        System.out.println("Sum of penalties for naive = " + sumOfPenalties);
 
 //        int[] startPoints = {0, 1, 2};
 //        ArrayList<Integer> startIndexes = new ArrayList<>();
