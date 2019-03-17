@@ -18,11 +18,19 @@ public class Reader {
         try {
             BufferedReader in = new BufferedReader(new FileReader(fileName));
             String line;
+            int index = 0;
+
+            // Read file line by line
             while ((line = in.readLine()) != null) {
                 String[] coordinates = line.split("\\s");
                 int x = Integer.parseInt(coordinates[0]);
                 int y = Integer.parseInt(coordinates[1]);
-                points.add(new PointCoordinates(x, y));
+
+                // Add new point with ID
+                points.add(new PointCoordinates(index, x, y));
+
+                // Index as next ID
+                index++;
             }
             in.close();
         } catch (IOException e) {

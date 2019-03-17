@@ -1,10 +1,12 @@
 package sample;
 
 public class PointCoordinates {
+    private int ID;
     private int x;
     private int y;
 
-    public PointCoordinates(int x, int y) {
+    public PointCoordinates(int ID, int x, int y) {
+        this.ID = ID;
         this.x = x;
         this.y = y;
     }
@@ -15,5 +17,9 @@ public class PointCoordinates {
 
     public int getY() {
         return y;
+    }
+
+    public int getID() {
+        return ID;
     }
 }

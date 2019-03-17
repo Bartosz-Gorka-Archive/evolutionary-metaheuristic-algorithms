@@ -41,8 +41,11 @@ public class PrimSolver {
         // Prepare list with all possible paths (fragments) between points
         ArrayList<PointsPath> possiblePaths = new ArrayList<>();
         for (int first = 0; first < pointsToVisit; first++) {
+            int start = indexes[first];
+
             for (int second = first + 1; second < pointsToVisit; second++) {
-                possiblePaths.add(new PointsPath(first, second, distanceMatrix[first][second]));
+                int end = indexes[second];
+                possiblePaths.add(new PointsPath(start, end, distanceMatrix[start][end]));
             }
         }
 
@@ -50,6 +53,7 @@ public class PrimSolver {
         Collections.sort(possiblePaths);
 
         // Add first point to path list
+        if (possiblePaths.isEmpty()) return;
         PointsPath point = possiblePaths.remove(0);
         this.path.add(point);
         visitedPoints = 2;
