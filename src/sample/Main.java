@@ -60,20 +60,19 @@ public class Main extends Application {
             elementsWithAssignmentToGroups.get(selectedGroupIndex).add(ID);
         }
 
-        // TODO enable calc
-//        // Calculate sum of MSTs
-//        HashSet<ArrayList<PointsPath>> preparedGroups = new HashSet<>();
-//        double sumOfPenalties = 0.0;
-//        for (Map.Entry<Integer, HashSet<Integer>> group : elementsWithAssignmentToGroups.entrySet()) {
-//            PrimSolver solver = new PrimSolver();
-//            solver.construct(group.getValue().stream().mapToInt(Integer::intValue).toArray(), distanceMatrix);
-//            sumOfPenalties += solver.getPenalties();
-//            preparedGroups.add(solver.getPath());
-//        }
-//        System.out.println("Sum of penalties for naive = " + sumOfPenalties);
-//
-//        // Show groups on graph
-//        new Drawer().drawInputInstance(coordinates, preparedGroups);
+        // Calculate sum of MSTs
+        HashSet<ArrayList<PointsPath>> preparedGroups = new HashSet<>();
+        double sumOfPenalties = 0.0;
+        for (Map.Entry<Integer, HashSet<Integer>> group : elementsWithAssignmentToGroups.entrySet()) {
+            PrimSolver solver = new PrimSolver();
+            solver.construct(group.getValue().stream().mapToInt(Integer::intValue).toArray(), distanceMatrix);
+            sumOfPenalties += solver.getPenalties();
+            preparedGroups.add(solver.getPath());
+        }
+        System.out.println("Sum of penalties for naive = " + sumOfPenalties);
+
+        // Show groups on graph
+        new Drawer().drawInputInstance(coordinates, preparedGroups);
 
         // Custom assignment
         // Start with not used points list
@@ -142,7 +141,7 @@ public class Main extends Application {
             double maxValue = sumOfMSTs.stream().mapToDouble(Double::doubleValue).max().getAsDouble();
             int indexOfPointWithMaxValue = sumOfMSTs.indexOf(maxValue);
 
-            double v = mstValues.get(indexOfPointWithMaxValue).stream().mapToDouble(Double::doubleValue).max().getAsDouble();
+            double v = mstValues.get(indexOfPointWithMaxValue).stream().mapToDouble(Double::doubleValue).min().getAsDouble();
             lastChangedGroupID = mstValues.get(indexOfPointWithMaxValue).indexOf(v);
             listOfPoints.get(lastChangedGroupID).add(indexOfPointWithMaxValue);
 
@@ -195,8 +194,7 @@ public class Main extends Application {
         HashSet<ArrayList<PointsPath>> preparedFinalGroups = new HashSet<>();
         preparedFinalGroups.add(primSolver.getPath());
 
-        // TODO enable calc
         // Draw solution as a graph
-//        new Drawer().drawInputInstance(coordinates, preparedFinalGroups);
+        new Drawer().drawInputInstance(coordinates, preparedFinalGroups);
     }
 }
