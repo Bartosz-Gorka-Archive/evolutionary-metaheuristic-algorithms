@@ -79,20 +79,21 @@ public class Main extends Application {
 
             // Calculate sum of MSTs
             HashSet<ArrayList<PointsPath>> preparedGroups = new HashSet<>();
-            double sumOfPenalties = 0.0;
+            double meanOfPenalties = 0.0;
             for (Map.Entry<Integer, HashSet<Integer>> group : elementsWithAssignmentToGroups.entrySet()) {
                 PrimSolver solver = new PrimSolver();
                 solver.construct(group.getValue().stream().mapToInt(Integer::intValue).toArray(), distanceMatrix);
                 //sumOfPenalties += solver.getPenalties();
                 solver.constructMeanOfDistance(group.getValue().stream().mapToInt(Integer::intValue).toArray(), distanceMatrix);
-                sumOfPenalties += solver.getMeanOfDistances();
+                meanOfPenalties += solver.getMeanOfDistances();
                 preparedGroups.add(solver.getPath());
             }
-            System.out.println("Sum of penalties for naive = " + sumOfPenalties);
-            naiveResults[iteration] = sumOfPenalties;
-            if (sumOfPenalties < bestNaiveResult) {
+            meanOfPenalties = meanOfPenalties / GROUPS;
+            System.out.println("Mean of penalties for naive = " + meanOfPenalties);
+            naiveResults[iteration] = meanOfPenalties;
+            if (meanOfPenalties < bestNaiveResult) {
                 bestNaivepreparedGroups = preparedGroups;
-                bestNaiveResult = sumOfPenalties;
+                bestNaiveResult = meanOfPenalties;
             }
 
             //REGRET ALGORITHM
@@ -181,7 +182,7 @@ public class Main extends Application {
             System.out.println("Regret time= " + (regretEndTime - regretStartTime) / 1000 + " ms\n");
 
             // Calculate sum of penalties for regret algorithm
-            double sumPenaltiesRegret = 0.0;
+            double meanPenaltiesRegret = 0.0;
             HashSet<ArrayList<PointsPath>> preparedRegretGroups = new HashSet<>();
             for (HashSet<Integer> group : listOfPoints) {
                 //System.out.println(group);
@@ -189,14 +190,15 @@ public class Main extends Application {
                 solver.construct(group.stream().mapToInt(Integer::intValue).toArray(), distanceMatrix);
                 //sumPenaltiesRegret += solver.getPenalties();
                 solver.constructMeanOfDistance(group.stream().mapToInt(Integer::intValue).toArray(), distanceMatrix);
-                sumPenaltiesRegret += solver.getMeanOfDistances();
+                meanPenaltiesRegret += solver.getMeanOfDistances();
                 preparedRegretGroups.add(solver.getPath());
             }
-            System.out.println("Sum of penalties for regret = " + sumPenaltiesRegret);
-            regretResults[iteration] = sumPenaltiesRegret;
-            if (sumPenaltiesRegret < bestRegretResult) {
+            meanPenaltiesRegret = meanPenaltiesRegret / GROUPS;
+            System.out.println("Mean of penalties for regret = " + meanPenaltiesRegret);
+            regretResults[iteration] = meanPenaltiesRegret;
+            if (meanPenaltiesRegret < bestRegretResult) {
                 bestPreparedRegretGroups = preparedRegretGroups;
-                bestRegretResult = sumPenaltiesRegret;
+                bestRegretResult = meanPenaltiesRegret;
             }
         }
         // Show groups on graph

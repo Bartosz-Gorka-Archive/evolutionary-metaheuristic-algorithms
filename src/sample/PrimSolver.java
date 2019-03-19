@@ -98,7 +98,7 @@ public class PrimSolver {
                 }
             }
         }
-        this.meanOfDistances = distancesSum / indexes.length;
+        this.meanOfDistances = distancesSum / (indexes.length * indexes.length);
     }
 
     /**
