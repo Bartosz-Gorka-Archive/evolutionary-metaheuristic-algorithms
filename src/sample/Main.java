@@ -20,150 +20,209 @@ public class Main extends Application {
         EuclideanDistance euclideanDistance = new EuclideanDistance();
         double[][] distanceMatrix = euclideanDistance.calculateDistanceMatrix(coordinates);
 
-        // Random start indexes
-        HashSet<Integer> startIndexesSet = new HashSet<>();
-        int totalElementsLength = coordinates.size();
-        Random random = new Random();
+        HashSet<ArrayList<PointsPath>> bestNaivepreparedGroups = new HashSet<>();
+        HashSet<ArrayList<PointsPath>> bestPreparedRegretGroups = new HashSet<>();
 
-        // Generate randomized indexes of start points
-        while (startIndexesSet.size() < GROUPS) {
-            startIndexesSet.add(random.nextInt(totalElementsLength));
-        }
-        ArrayList<Integer> startIndexesList = new ArrayList<>(startIndexesSet);
+        double[] naiveResults = new double[100], regretResults = new double[100],
+                regretTimes = new double[100], naiveTimes = new double[100];
 
-        // k-means with static center
-        HashMap<Integer, HashSet<Integer>> elementsWithAssignmentToGroups = new HashMap<>();
+        double bestNaiveResult = 999999.0, bestRegretResult = 999999.0;
 
-        // Initialize groups
-        for (int index : startIndexesList) {
-            elementsWithAssignmentToGroups.put(index, new HashSet<>());
-        }
+        for (int iteration = 0; iteration < 100; iteration++) {
 
-        // Assign each point to group
-        for (PointCoordinates point : coordinates) {
-            int ID = point.getID();
-            int selectedGroupIndex = 0;
-            double minDistanceValue = Double.MAX_VALUE;
+            // Random start indexes
+            HashSet<Integer> startIndexesSet = new HashSet<>();
+            int totalElementsLength = coordinates.size();
+            Random random = new Random();
 
-            for (int centerPointIndex : startIndexesList) {
-                // Get distance from array
-                double distance = distanceMatrix[centerPointIndex][ID];
+            // Generate randomized indexes of start points
+            while (startIndexesSet.size() < GROUPS) {
+                startIndexesSet.add(random.nextInt(totalElementsLength));
+            }
+            ArrayList<Integer> startIndexesList = new ArrayList<>(startIndexesSet);
 
-                // Check distance is smaller than current stored - if yes => update index
-                if (distance < minDistanceValue) {
-                    minDistanceValue = distance;
-                    selectedGroupIndex = centerPointIndex;
-                }
+            //NAIVE ALGORITHM
+            long naiveStartTime = System.nanoTime();
+
+            // k-means with static center
+            HashMap<Integer, HashSet<Integer>> elementsWithAssignmentToGroups = new HashMap<>();
+
+            // Initialize groups
+            for (int index : startIndexesList) {
+                elementsWithAssignmentToGroups.put(index, new HashSet<>());
             }
 
-            // Add point to selected group
-            elementsWithAssignmentToGroups.get(selectedGroupIndex).add(ID);
-        }
-
-        // Calculate sum of MSTs
-        HashSet<ArrayList<PointsPath>> preparedGroups = new HashSet<>();
-        double sumOfPenalties = 0.0;
-        for (Map.Entry<Integer, HashSet<Integer>> group : elementsWithAssignmentToGroups.entrySet()) {
-            PrimSolver solver = new PrimSolver();
-            solver.construct(group.getValue().stream().mapToInt(Integer::intValue).toArray(), distanceMatrix);
-            sumOfPenalties += solver.getPenalties();
-            preparedGroups.add(solver.getPath());
-        }
-        System.out.println("Sum of penalties for naive = " + sumOfPenalties);
-
-        // Show groups on graph
-        new Drawer().drawInputInstance(coordinates, preparedGroups);
-
-        // Custom assignment
-        // Start with not used points list
-        HashSet<PointCoordinates> notUsedPoints = new HashSet<>();
-        for (PointCoordinates point : coordinates) {
-            if (!startIndexesList.contains(point.getID())) {
-                notUsedPoints.add(point);
-            }
-        }
-        int notUsedPointsCount = notUsedPoints.size();
-
-        // Set current MST value
-        ArrayList<Double> sumOfMSTs = new ArrayList<>();
-        HashMap<Integer, ArrayList<Double>> mstValues = new HashMap<>();
-        for (int index = 0; index < totalElementsLength; index++) {
-            sumOfMSTs.add(0.0);
-            ArrayList<Double> list = new ArrayList<>();
-            for (int i = 0; i < GROUPS; i++) {
-                list.add(0.0);
-            }
-            mstValues.put(index, list);
-        }
-
-        // List of points in groups
-        ArrayList<HashSet<Integer>> listOfPoints = new ArrayList<>();
-
-        // Set start indexes' points as already used
-        for (int index : startIndexesList) {
-            sumOfMSTs.set(index, -10.0);
-        }
-        for (int index : startIndexesList) {
-            HashSet<Integer> set = new HashSet<>();
-            set.add(index);
-            listOfPoints.add(set);
-        }
-
-        // Run in loop until used all points
-        int lastChangedGroupID = -1;
-        while (notUsedPointsCount > 0) {
+            // Assign each point to group
             for (PointCoordinates point : coordinates) {
-                // Ignore when already used
-                if (sumOfMSTs.get(point.getID()) < -2) {
-                    continue;
-                }
+                int ID = point.getID();
+                int selectedGroupIndex = 0;
+                double minDistanceValue = Double.MAX_VALUE;
 
-                // Add point to group and calculate MST
-                for (int index = 0; index < GROUPS; index++) {
-                    if (index == lastChangedGroupID || lastChangedGroupID == -1) {
-                        HashSet<Integer> set = (HashSet<Integer>) listOfPoints.get(index).clone();
-                        set.add(point.getID());
-                        int[] ints = set.stream().mapToInt(Integer::intValue).toArray();
+                for (int centerPointIndex : startIndexesList) {
+                    // Get distance from array
+                    double distance = distanceMatrix[centerPointIndex][ID];
 
-                        PrimSolver solver = new PrimSolver();
-                        solver.construct(ints, distanceMatrix);
-                        mstValues.get(point.getID()).set(index, solver.getPenalties());
+                    // Check distance is smaller than current stored - if yes => update index
+                    if (distance < minDistanceValue) {
+                        minDistanceValue = distance;
+                        selectedGroupIndex = centerPointIndex;
                     }
                 }
 
-                // Recalculate sum of MSTs
-                double minValue = mstValues.get(point.getID()).stream().mapToDouble(Double::doubleValue).min().getAsDouble();
-                double sum = mstValues.get(point.getID()).stream().mapToDouble(Double::doubleValue).sum() - GROUPS * minValue;
-                sumOfMSTs.set(point.getID(), sum);
+                // Add point to selected group
+                elementsWithAssignmentToGroups.get(selectedGroupIndex).add(ID);
             }
 
-            // Add point to group
-            double maxValue = sumOfMSTs.stream().mapToDouble(Double::doubleValue).max().getAsDouble();
-            int indexOfPointWithMaxValue = sumOfMSTs.indexOf(maxValue);
+            long naiveEndTime = System.nanoTime();
+            naiveTimes[iteration] = (naiveEndTime - naiveStartTime) / 100;
+            System.out.println("Naive time= " + (naiveEndTime - naiveStartTime) / 1000 + " ms\n");
 
-            double v = mstValues.get(indexOfPointWithMaxValue).stream().mapToDouble(Double::doubleValue).min().getAsDouble();
-            lastChangedGroupID = mstValues.get(indexOfPointWithMaxValue).indexOf(v);
-            listOfPoints.get(lastChangedGroupID).add(indexOfPointWithMaxValue);
+            // Calculate sum of MSTs
+            HashSet<ArrayList<PointsPath>> preparedGroups = new HashSet<>();
+            double sumOfPenalties = 0.0;
+            for (Map.Entry<Integer, HashSet<Integer>> group : elementsWithAssignmentToGroups.entrySet()) {
+                PrimSolver solver = new PrimSolver();
+                solver.construct(group.getValue().stream().mapToInt(Integer::intValue).toArray(), distanceMatrix);
+                //sumOfPenalties += solver.getPenalties();
+                solver.constructMeanOfDistance(group.getValue().stream().mapToInt(Integer::intValue).toArray(), distanceMatrix);
+                sumOfPenalties += solver.getMeanOfDistances();
+                preparedGroups.add(solver.getPath());
+            }
+            System.out.println("Sum of penalties for naive = " + sumOfPenalties);
+            naiveResults[iteration] = sumOfPenalties;
+            if (sumOfPenalties < bestNaiveResult) {
+                bestNaivepreparedGroups = preparedGroups;
+                bestNaiveResult = sumOfPenalties;
+            }
 
-            // Set point as used
-            sumOfMSTs.set(indexOfPointWithMaxValue, -10.0);
-            notUsedPointsCount--;
+            //REGRET ALGORITHM
+            long regretStartTime = System.nanoTime();
+
+            // Custom assignment
+            // Start with not used points list
+            HashSet<PointCoordinates> notUsedPoints = new HashSet<>();
+            for (PointCoordinates point : coordinates) {
+                if (!startIndexesList.contains(point.getID())) {
+                    notUsedPoints.add(point);
+                }
+            }
+            int notUsedPointsCount = notUsedPoints.size();
+
+            // Set current MST value
+            ArrayList<Double> sumOfMSTs = new ArrayList<>();
+            HashMap<Integer, ArrayList<Double>> mstValues = new HashMap<>();
+            for (int index = 0; index < totalElementsLength; index++) {
+                sumOfMSTs.add(0.0);
+                ArrayList<Double> list = new ArrayList<>();
+                for (int i = 0; i < GROUPS; i++) {
+                    list.add(0.0);
+                }
+                mstValues.put(index, list);
+            }
+
+            // List of points in groups
+            ArrayList<HashSet<Integer>> listOfPoints = new ArrayList<>();
+
+            // Set start indexes' points as already used
+            for (int index : startIndexesList) {
+                sumOfMSTs.set(index, -10.0);
+            }
+            for (int index : startIndexesList) {
+                HashSet<Integer> set = new HashSet<>();
+                set.add(index);
+                listOfPoints.add(set);
+            }
+
+            // Run in loop until used all points
+            int lastChangedGroupID = -1;
+            while (notUsedPointsCount > 0) {
+                for (PointCoordinates point : coordinates) {
+                    // Ignore when already used
+                    if (sumOfMSTs.get(point.getID()) < -2) {
+                        continue;
+                    }
+
+                    // Add point to group and calculate MST
+                    for (int index = 0; index < GROUPS; index++) {
+                        if (index == lastChangedGroupID || lastChangedGroupID == -1) {
+                            HashSet<Integer> set = (HashSet<Integer>) listOfPoints.get(index).clone();
+                            set.add(point.getID());
+                            int[] ints = set.stream().mapToInt(Integer::intValue).toArray();
+
+                            PrimSolver solver = new PrimSolver();
+                            solver.construct(ints, distanceMatrix);
+                            solver.constructMeanOfDistance(ints, distanceMatrix);
+                            //mstValues.get(point.getID()).set(index, solver.getPenalties());
+                            mstValues.get(point.getID()).set(index, solver.getMeanOfDistances());
+                        }
+                    }
+
+                    // Recalculate sum of MSTs
+                    double minValue = mstValues.get(point.getID()).stream().mapToDouble(Double::doubleValue).min().getAsDouble();
+                    double sum = mstValues.get(point.getID()).stream().mapToDouble(Double::doubleValue).sum() - GROUPS * minValue;
+                    sumOfMSTs.set(point.getID(), sum);
+                }
+
+                // Add point to group
+                double maxValue = sumOfMSTs.stream().mapToDouble(Double::doubleValue).max().getAsDouble();
+                int indexOfPointWithMaxValue = sumOfMSTs.indexOf(maxValue);
+
+                double v = mstValues.get(indexOfPointWithMaxValue).stream().mapToDouble(Double::doubleValue).min().getAsDouble();
+                lastChangedGroupID = mstValues.get(indexOfPointWithMaxValue).indexOf(v);
+                listOfPoints.get(lastChangedGroupID).add(indexOfPointWithMaxValue);
+
+                // Set point as used
+                sumOfMSTs.set(indexOfPointWithMaxValue, -10.0);
+                notUsedPointsCount--;
+            }
+
+            long regretEndTime = System.nanoTime();
+            regretTimes[iteration] = (regretEndTime - regretStartTime) / 1000;
+            System.out.println("Regret time= " + (regretEndTime - regretStartTime) / 1000 + " ms\n");
+
+            // Calculate sum of penalties for regret algorithm
+            double sumPenaltiesRegret = 0.0;
+            HashSet<ArrayList<PointsPath>> preparedRegretGroups = new HashSet<>();
+            for (HashSet<Integer> group : listOfPoints) {
+                //System.out.println(group);
+                PrimSolver solver = new PrimSolver();
+                solver.construct(group.stream().mapToInt(Integer::intValue).toArray(), distanceMatrix);
+                //sumPenaltiesRegret += solver.getPenalties();
+                solver.constructMeanOfDistance(group.stream().mapToInt(Integer::intValue).toArray(), distanceMatrix);
+                sumPenaltiesRegret += solver.getMeanOfDistances();
+                preparedRegretGroups.add(solver.getPath());
+            }
+            System.out.println("Sum of penalties for regret = " + sumPenaltiesRegret);
+            regretResults[iteration] = sumPenaltiesRegret;
+            if (sumPenaltiesRegret < bestRegretResult) {
+                bestPreparedRegretGroups = preparedRegretGroups;
+                bestRegretResult = sumPenaltiesRegret;
+            }
         }
-
-        // Calculate sum of penalties for regret algorithm
-        double sumPenaltiesRegret = 0.0;
-        HashSet<ArrayList<PointsPath>> preparedRegretGroups = new HashSet<>();
-        for (HashSet<Integer> group : listOfPoints) {
-            System.out.println(group);
-            PrimSolver solver = new PrimSolver();
-            solver.construct(group.stream().mapToInt(Integer::intValue).toArray(), distanceMatrix);
-            sumPenaltiesRegret += solver.getPenalties();
-            preparedRegretGroups.add(solver.getPath());
-        }
-        System.out.println("Sum of penalties for regret = " + sumPenaltiesRegret);
-
+        // Show groups on graph
+        new Drawer().drawInputInstance(coordinates, bestNaivepreparedGroups);
         // Show regret on graph
-        new Drawer().drawInputInstance(coordinates, preparedRegretGroups);
+        new Drawer().drawInputInstance(coordinates, bestPreparedRegretGroups);
+
+        System.out.println("Best result for naive = " + bestNaiveResult);
+        System.out.println("Best result for regret = " + bestRegretResult);
+        System.out.println("Mean result for naive = " + Arrays.stream(naiveResults).average().getAsDouble());
+        System.out.println("Mean result for regret = " + Arrays.stream(regretResults).average().getAsDouble());
+        System.out.println("Max result for naive = " + Arrays.stream(naiveResults).max().getAsDouble());
+        System.out.println("Max result for regret = " + Arrays.stream(regretResults).max().getAsDouble());
+
+        System.out.println("TIMING:");
+        System.out.println("Best time for naive = " + Arrays.stream(naiveTimes).min().getAsDouble());
+        System.out.println("Best time for regret = " + Arrays.stream(regretTimes).min().getAsDouble());
+        System.out.println("Mean time for naive = " + Arrays.stream(naiveTimes).average().getAsDouble());
+        System.out.println("Mean time for regret = " + Arrays.stream(regretTimes).average().getAsDouble());
+        System.out.println("Max time for naive = " + Arrays.stream(naiveTimes).max().getAsDouble());
+        System.out.println("Max time for regret = " + Arrays.stream(regretTimes).max().getAsDouble());
+
+        //constructSingleMST();
+    }
+
+    private void constructSingleMST(double[][] distanceMatrix, ArrayList<PointCoordinates> coordinates) {
 
         // Construct single MST
         PrimSolver primSolver = new PrimSolver();
