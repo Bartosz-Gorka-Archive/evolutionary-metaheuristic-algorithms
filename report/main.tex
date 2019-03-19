@@ -62,13 +62,13 @@
 \maketitle
 
 \section{Opis problemu}
-Celem projektu było przygotowanie dwóch wersji algorytmów rozwiązujących problem grupowania. Liczba grup została ustalona na $10$. Funkcja celu to minimalizacja średniej odległości pomiędzy wierzchołkami drzew rozpinających (minimum spanning tree) dla poszczególnych grup.
+Celem projektu było przygotowanie dwóch wersji algorytmów rozwiązujących problem grupowania. Liczba grup została ustalona na $10$. Funkcja celu to minimalizacja średniej odległości wszystkich par obiektów umieszczonych w ramach tej samej grupy.
 
 Jako kluczowe było wykorzystanie macierzy odległości (dystansu pomiędzy punktami) zamiast użycia przestrzeni kartezjańskiej jako punktu wyjścia. Takie założenie pozwala wykorzystać algorytmy również w przypadku zmiany funkcji odległości (macierz odległości jest wystarczająca do dokonania przydziału).
 
 \section{Pseudokody przygotowanych algorytmów}
 \subsection{Algorytm zachłanny}
-Algorytm zachłanny dokonuje przydziału obiektu zgodnie z pseudokodem zaprezentowanym poniżej. Dla każdego punktu wybiera grupę do której ma najmniejszą wartość odległości (pomiędzy obecnym punktem a punktem startowym grupy). Po wybraniu najlepszego przydziału (najmniejsza odległość), dodajemy punkt do listy punktów przynależących do wybranej grupy.
+Algorytm zachłanny dokonuje przydziału obiektu zgodnie z pseudokodem zaprezentowanym poniżej. Dla każdego punktu wybiera grupę do której ma najmniejszą wartość odległości (pomiędzy obecnym punktem a punktem startowym grupy). Po wybraniu najlepszego przydziału (najmniejsza odległość), dodajemy punkt do listy punktów przynależących do wybranej grupy. Inicjalizacja punktów startowych odbywa się poprzez losowy wybór elementu startowego w każdej z grup.
 
 \begin{lstlisting}[style=JavaStyle]
 for each point in list of points {
@@ -90,7 +90,7 @@ for each point in list of points {
 \end{lstlisting}
 
 \subsection{Algorytm z wykorzystaniem żalu}
-Algorytm z wykorzystaniem żalu dokonuje przydziału obiektu zgodnie z pseudokodem zaprezentowanym poniżej. W każdej iteracji przydziela jeden punkt do jednej grupy. Dla każdego punktu sprawdza jak bardzo jego dołożenie do danej grupy pogorszy wartość funkcji celu. Następnie wybiera punkt, którego dołożenie do którejś z grup będzie najmniej korzystne i dołącza go do grupy, która znajduje się najbliżej niego (najkorzystniejszy wybór wśród wszystkich grup).
+Algorytm z wykorzystaniem żalu dokonuje przydziału obiektu zgodnie z pseudokodem zaprezentowanym poniżej. W każdej iteracji przydziela jeden punkt do jednej grupy. Dla każdego punktu sprawdza jak bardzo jego dołożenie do danej grupy pogorszy wartość funkcji celu. Następnie wybiera punkt, którego dołożenie do którejś z grup będzie najmniej korzystne i dołącza go do grupy, która znajduje się najbliżej niego (najkorzystniejszy wybór wśród wszystkich grup). Inicjalizacja punktów startowych odbywa się poprzez losowy wybór elementu startowego w każdej z grup.
 
 \begin{lstlisting}[style=JavaStyle]
 pointsInGroup = []
@@ -119,14 +119,14 @@ W tabeli \ref{table:wyniki} zaprezentowano wyniki eksperymentów obliczeniowych.
 \hline
 \textbf{Cecha}                                                                     & \multicolumn{1}{c|}{\textbf{Algorytm zachłanny}} & \multicolumn{1}{c|}{\textbf{Algorytm oparty o żal}} \\ \hline
 \textbf{\begin{tabular}[c]{@{}c@{}}Wartość minimalna\\ funkcji celu\end{tabular}}  
-&   768,73                                               
-&   834,76                                                  \\ \hline
+&   33.92                                               
+&   37.62                                                 \\ \hline
 \textbf{\begin{tabular}[c]{@{}c@{}}Wartość maksymalna\\ funkcji celu\end{tabular}} 
-&   1144,93                                              
-&   1417,56                                                  \\ \hline
+&   44.44                                              
+&   73.82                                                 \\ \hline
 \textbf{\begin{tabular}[c]{@{}c@{}}Wartość średnia\\ funkcji celu\end{tabular}}    
-&   909,12                                               
-&   1052,56                                                  \\ \hline
+&   38.47                                               
+&   48.36                                                  \\ \hline
 \textbf{\begin{tabular}[c]{@{}c@{}}Wartość minimalna\\ czasu obliczeń {[}sec{]}\end{tabular}} 
 &   0,000804                                               
 &   0,18                                                  \\ \hline
