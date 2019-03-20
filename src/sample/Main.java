@@ -6,7 +6,7 @@ import javafx.stage.Stage;
 import java.util.*;
 
 public class Main extends Application {
-    private final static int GROUPS = 10;
+    private final static int GROUPS = 20;
     private final static int TESTS_NUMBER = 1;
 
     private HashSet<ArrayList<PointsPath>> preparedGroups;
@@ -26,7 +26,7 @@ public class Main extends Application {
     @Override
     public void start(Stage primaryStage) {
         Reader reader = new Reader();
-        ArrayList<PointCoordinates> coordinates = reader.readInstance("objects.data");
+        ArrayList<PointCoordinates> coordinates = reader.readInstance("objects20_06.data");
 
         EuclideanDistance euclideanDistance = new EuclideanDistance();
         double[][] distanceMatrix = euclideanDistance.calculateDistanceMatrix(coordinates);
