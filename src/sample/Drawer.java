@@ -23,6 +23,16 @@ public class Drawer {
             Color.YELLOW,
             Color.VIOLET,
             Color.SKYBLUE,
+            Color.SPRINGGREEN,
+            Color.RED,
+            Color.BLUE,
+            Color.GOLD,
+            Color.BLACK,
+            Color.SIENNA,
+            Color.SILVER,
+            Color.YELLOW,
+            Color.VIOLET,
+            Color.SKYBLUE,
             Color.SPRINGGREEN
     };
 

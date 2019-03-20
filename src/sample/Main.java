@@ -7,11 +7,17 @@ import java.util.*;
 
 public class Main extends Application {
     private final static int GROUPS = 10;
+    private final static int TESTS_NUMBER = 1;
 
-    //For naive algorithm
     private HashSet<ArrayList<PointsPath>> preparedGroups;
+    //For random algorithm init
+    private HashSet<ArrayList<PointsPath>> bestRandomGroups;
     //For regret algorithm
-    private HashSet<ArrayList<PointsPath>> preparedRegretGroups;
+    private HashSet<ArrayList<PointsPath>> bestRegretGroups;
+    //For steepest local algorithm
+    private HashSet<ArrayList<PointsPath>> bestSteepestGroups;
+    //For steepest local algorithm
+    private HashSet<ArrayList<PointsPath>> bestGreedyGroups;
 
     public static void main(String[] args) {
         launch(args);
@@ -25,72 +31,116 @@ public class Main extends Application {
         EuclideanDistance euclideanDistance = new EuclideanDistance();
         double[][] distanceMatrix = euclideanDistance.calculateDistanceMatrix(coordinates);
 
-        HashSet<ArrayList<PointsPath>> bestNaivepreparedGroups = new HashSet<>();
-        HashSet<ArrayList<PointsPath>> bestPreparedRegretGroups = new HashSet<>();
+        HashSet<ArrayList<PointsPath>> bestNaiveGreedyGroups = new HashSet<>();
+        HashSet<ArrayList<PointsPath>> bestNaiveSteepestGroups = new HashSet<>();
+        HashSet<ArrayList<PointsPath>> bestRandomGreedyGroups = new HashSet<>();
+        HashSet<ArrayList<PointsPath>> bestRandomSteepestGroups = new HashSet<>();
 
-        double[] naiveResults = new double[100], regretResults = new double[100],
-                regretTimes = new double[100], naiveTimes = new double[100];
-        double bestNaiveResult = 999999.0, bestRegretResult = 999999.0;
+        double[] naiveGreedyResults = new double[TESTS_NUMBER], naiveSteepestResults = new double[TESTS_NUMBER],
+                randomGreedyResults = new double[TESTS_NUMBER], randomSteepestResults = new double[TESTS_NUMBER],
+                naiveGreedyTimes = new double[TESTS_NUMBER],naiveSteepestTimes = new double[TESTS_NUMBER],
+                randomGreedyTimes = new double[TESTS_NUMBER], randomSteepestTimes = new double[TESTS_NUMBER];
+        double bestNaiveGreedyResult = 999999.9, bestRandomGreedyResult = 99999.9, bestNaiveSteepestResult = 99999.9,
+                bestRandomSteepestResult = 99999.9;
+        for (int iteration = 0; iteration < TESTS_NUMBER; iteration++) {
 
-        for (int iteration = 0; iteration < 100; iteration++) {
-
-            // Random start indexes
+            // Random start indexes for naive
             HashSet<Integer> startIndexesSet = new HashSet<>();
             int totalElementsLength = coordinates.size();
             Random random = new Random();
-
             // Generate randomized indexes of start points
             while (startIndexesSet.size() < GROUPS) {
                 startIndexesSet.add(random.nextInt(totalElementsLength));
             }
             ArrayList<Integer> startIndexesList = new ArrayList<>(startIndexesSet);
 
-            //NAIVE ALGORITHM
-            long naiveStartTime = System.nanoTime();
-            naiveResults[iteration] = naiveAlgorithm(distanceMatrix, startIndexesList, coordinates);
-            if ( naiveResults[iteration] < bestNaiveResult) {
-                bestNaivepreparedGroups = preparedGroups;
-                bestNaiveResult =  naiveResults[iteration];
-            }
-            long naiveEndTime = System.nanoTime();
-            naiveTimes[iteration] = (naiveEndTime - naiveStartTime) / 1000;
-            System.out.println("Naive time= " + (naiveEndTime - naiveStartTime) / 1000 + " ms\n");
+            //Naive and random init instance
+            HashMap<Integer, HashSet<Integer>> naiveInstance = naiveAlgorithm(distanceMatrix, startIndexesList, coordinates);
+            HashMap<Integer, HashSet<Integer>> randomInstance = randomInitGroups(distanceMatrix, startIndexesList, coordinates);
 
-            //REGRET ALGORITHM
-            long regretStartTime = System.nanoTime();
-            regretResults[iteration] = regretAlgorithm(distanceMatrix, startIndexesList, coordinates);
-            if (regretResults[iteration] < bestRegretResult) {
-                bestPreparedRegretGroups = preparedRegretGroups;
-                bestRegretResult = regretResults[iteration];
+            //GREEDY NAIVE ALGORITHM
+            GreedyLocalSolver naivemGreedyLocalSolver = new GreedyLocalSolver(naiveInstance, GROUPS);
+            List<ArrayList<Integer>> naiveGreedyLocalResults = naivemGreedyLocalSolver.run(distanceMatrix);
+            naiveGreedyResults[iteration] = solveLocalSearch(naiveGreedyLocalResults, distanceMatrix);
+            if (naiveGreedyResults[iteration] < bestNaiveGreedyResult) {
+                bestNaiveGreedyResult = naiveGreedyResults[iteration];
+                bestNaiveGreedyGroups = preparedGroups;
             }
-            long regretEndTime = System.nanoTime();
-            regretTimes[iteration] = (regretEndTime - regretStartTime) / 1000;
-            System.out.println("Regret time= " + (regretEndTime - regretStartTime) / 1000 + " ms\n");
+            //GREEDY RANDOM ALGORITHM
+            GreedyLocalSolver randomGreedyLocalSolver = new GreedyLocalSolver(randomInstance, GROUPS);
+            List<ArrayList<Integer>> randomGreedyLocalResults = randomGreedyLocalSolver.run(distanceMatrix);
+            randomGreedyResults[iteration] = solveLocalSearch(randomGreedyLocalResults, distanceMatrix);
+            if (randomGreedyResults[iteration] < bestRandomGreedyResult) {
+                bestRandomGreedyResult = randomGreedyResults[iteration];
+                bestRandomGreedyGroups = preparedGroups;
+            }
+            //STEEPEST NAIVE ALGORITHM
+            SteepestLocalSolver naiveSteepestLocalSolver = new SteepestLocalSolver(naiveInstance, GROUPS);
+            List<ArrayList<Integer>> naiveSteepestLocalResults = naiveSteepestLocalSolver.run(distanceMatrix);
+            naiveSteepestResults[iteration] = solveLocalSearch(naiveSteepestLocalResults, distanceMatrix);
+            if (naiveSteepestResults[iteration] < bestNaiveSteepestResult) {
+                bestNaiveSteepestResult = naiveSteepestResults[iteration];
+                bestNaiveSteepestGroups = preparedGroups;
+            }
+            //STEEPEST RANDOM ALGORITHM
+            SteepestLocalSolver randomSteepestLocalSolver = new SteepestLocalSolver(randomInstance, GROUPS);
+            List<ArrayList<Integer>> randomSteepestLocalResults = randomSteepestLocalSolver.run(distanceMatrix);
+            randomSteepestResults[iteration] = solveLocalSearch(randomSteepestLocalResults, distanceMatrix);
+            if (randomSteepestResults[iteration] < bestRandomSteepestResult) {
+                bestRandomSteepestResult = randomSteepestResults[iteration];
+                bestRandomSteepestGroups = preparedGroups;
+            }
+
         }
         // Show groups on graph
-        new Drawer().drawInputInstance(coordinates, bestNaivepreparedGroups);
-        // Show regret on graph
-        new Drawer().drawInputInstance(coordinates, bestPreparedRegretGroups);
+        new Drawer().drawInputInstance(coordinates, bestNaiveGreedyGroups);
+        new Drawer().drawInputInstance(coordinates, bestNaiveSteepestGroups);
+        new Drawer().drawInputInstance(coordinates, bestRandomGreedyGroups);
+        new Drawer().drawInputInstance(coordinates, bestRandomSteepestGroups);
 
-        System.out.println("Best result for naive = " + bestNaiveResult);
-        System.out.println("Best result for regret = " + bestRegretResult);
-        System.out.println("Mean result for naive = " + Arrays.stream(naiveResults).average().getAsDouble());
-        System.out.println("Mean result for regret = " + Arrays.stream(regretResults).average().getAsDouble());
-        System.out.println("Max result for naive = " + Arrays.stream(naiveResults).max().getAsDouble());
-        System.out.println("Max result for regret = " + Arrays.stream(regretResults).max().getAsDouble());
+        System.out.println("Min result for naive greedy = " + bestNaiveGreedyResult);
+        System.out.println("Min result for random greedy = " + bestRandomGreedyResult);
+        System.out.println("Min result for naive steepest = " + bestNaiveSteepestResult);
+        System.out.println("Min result for random steepest = " + bestRandomSteepestResult);
 
-        System.out.println("TIMING:");
+        System.out.println("Mean result for naive greedy = " + Arrays.stream(naiveGreedyResults).average().getAsDouble());
+        System.out.println("Mean result for  random greedy = " + Arrays.stream(randomGreedyResults).average().getAsDouble());
+        System.out.println("Mean result for naive steepest = " + Arrays.stream(naiveSteepestResults).average().getAsDouble());
+        System.out.println("Mean result for random steepest = " + Arrays.stream(randomSteepestResults).average().getAsDouble());
+
+        System.out.println("Max result for naive greedy = " + Arrays.stream(naiveGreedyResults).max().getAsDouble());
+        System.out.println("Max result for  random greedy = " + Arrays.stream(randomGreedyResults).max().getAsDouble());
+        System.out.println("Max result for naive steepest = " + Arrays.stream(naiveSteepestResults).max().getAsDouble());
+        System.out.println("Max result for random steepest = " + Arrays.stream(randomSteepestResults).max().getAsDouble());
+
+        /*System.out.println("TIMING:");
         System.out.println("Best time for naive = " + Arrays.stream(naiveTimes).min().getAsDouble());
         System.out.println("Best time for regret = " + Arrays.stream(regretTimes).min().getAsDouble());
         System.out.println("Mean time for naive = " + Arrays.stream(naiveTimes).average().getAsDouble());
         System.out.println("Mean time for regret = " + Arrays.stream(regretTimes).average().getAsDouble());
         System.out.println("Max time for naive = " + Arrays.stream(naiveTimes).max().getAsDouble());
         System.out.println("Max time for regret = " + Arrays.stream(regretTimes).max().getAsDouble());
-
-        //constructSingleMST();
+        */
     }
 
-    private double naiveAlgorithm (double[][] distanceMatrix, ArrayList<Integer> startIndexesList, ArrayList<PointCoordinates> coordinates) {
+    private double solveLocalSearch(List<ArrayList<Integer>> algorithmResults, double[][] distanceMatrix) {
+        preparedGroups = new HashSet<>();
+        PrimSolver solver = new PrimSolver();
+        for (ArrayList<Integer> integers : algorithmResults) {
+            int z = 0;
+            int[] arr = new int[integers.size()];
+            for (Integer i: integers) {
+                arr[z] = i;
+                z++;
+            }
+            solver.construct(arr, distanceMatrix);
+            solver.constructMeanOfDistance(arr, distanceMatrix);
+            System.out.println("Greedy algorithm = " + solver.getMeanOfDistances() + "\n");
+            preparedGroups.add(solver.getPath());
+        }
+        return solver.getMeanOfDistances();
+    }
+    private HashMap<Integer, HashSet<Integer>> naiveAlgorithm (double[][] distanceMatrix, ArrayList<Integer> startIndexesList, ArrayList<PointCoordinates> coordinates) {
         //NAIVE ALGORITHM
         // k-means with static center
         HashMap<Integer, HashSet<Integer>> elementsWithAssignmentToGroups = new HashMap<>();
@@ -133,7 +183,39 @@ public class Main extends Application {
         }
         meanOfPenalties = meanOfPenalties / GROUPS;
         System.out.println("Mean of penalties for naive = " + meanOfPenalties);
-        return meanOfPenalties;
+        return elementsWithAssignmentToGroups;
+    }
+
+    private HashMap<Integer, HashSet<Integer>> randomInitGroups (double[][] distanceMatrix, ArrayList<Integer> startIndexesList, ArrayList<PointCoordinates> coordinates) {
+        //NAIVE ALGORITHM
+        // k-means with static center
+        HashMap<Integer, HashSet<Integer>> elementsWithAssignmentToGroups = new HashMap<>();
+
+        // Initialize groups
+        for (int i = 0; i < GROUPS; i++) {
+            elementsWithAssignmentToGroups.put(i, new HashSet<>());
+        }
+
+        // Assign each point to group
+        for (PointCoordinates point : coordinates) {
+            Random random = new Random();
+            elementsWithAssignmentToGroups.get(random.nextInt(GROUPS)).add(point.getID());
+        }
+
+        // Calculate sum of MSTs
+        HashSet<ArrayList<PointsPath>> preparedRandomGroups = new HashSet<>();
+        double meanOfPenalties = 0.0;
+        for (Map.Entry<Integer, HashSet<Integer>> group : elementsWithAssignmentToGroups.entrySet()) {
+            PrimSolver solver = new PrimSolver();
+            solver.construct(group.getValue().stream().mapToInt(Integer::intValue).toArray(), distanceMatrix);
+            //sumOfPenalties += solver.getPenalties();
+            solver.constructMeanOfDistance(group.getValue().stream().mapToInt(Integer::intValue).toArray(), distanceMatrix);
+            meanOfPenalties += solver.getMeanOfDistances();
+            preparedRandomGroups.add(solver.getPath());
+        }
+        meanOfPenalties = meanOfPenalties / GROUPS;
+        System.out.println("Mean of penalties for random init = " + meanOfPenalties);
+        return elementsWithAssignmentToGroups;
     }
 
     private double regretAlgorithm(double[][] distanceMatrix, ArrayList<Integer> startIndexesList, ArrayList<PointCoordinates> coordinates) {
@@ -218,7 +300,7 @@ public class Main extends Application {
 
         // Calculate sum of penalties for regret algorithm
         double meanPenaltiesRegret = 0.0;
-        preparedRegretGroups = new HashSet<>();
+        HashSet<ArrayList<PointsPath>> preparedRegretGroups = new HashSet<>();
         for (HashSet<Integer> group : listOfPoints) {
             //System.out.println(group);
             PrimSolver solver = new PrimSolver();
