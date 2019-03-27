@@ -8,7 +8,7 @@ import java.util.*;
 public class Main extends Application {
     private final static int GROUPS = 20;
     private final static int TESTS_NUMBER = 1;
-    private final static boolean SHOW_STATISTICS = false;
+    private final static boolean SHOW_STATISTICS = true;
 
     private HashSet<ArrayList<PointsPath>> preparedGroups;
     //For random algorithm init
@@ -157,7 +157,7 @@ public class Main extends Application {
                 z++;
             }
             solver.construct(arr, distanceMatrix);
-            solver.constructMeanOfDistance(arr, distanceMatrix);
+//            solver.constructMeanOfDistance(arr, distanceMatrix);
             System.out.println("Greedy algorithm = " + solver.getMeanOfDistances() + "\n");
             preparedGroups.add(solver.getPath());
         }
@@ -165,7 +165,6 @@ public class Main extends Application {
     }
 
     private HashMap<Integer, HashSet<Integer>> naiveAlgorithm(double[][] distanceMatrix, ArrayList<Integer> startIndexesList, ArrayList<PointCoordinates> coordinates) {
-        //NAIVE ALGORITHM
         // k-means with static center
         HashMap<Integer, HashSet<Integer>> elementsWithAssignmentToGroups = new HashMap<>();
 
@@ -194,24 +193,15 @@ public class Main extends Application {
             elementsWithAssignmentToGroups.get(selectedGroupIndex).add(ID);
         }
 
-        // Calculate sum of MSTs
-        preparedGroups = new HashSet<>();
-        double meanOfPenalties = 0.0;
-        for (Map.Entry<Integer, HashSet<Integer>> group : elementsWithAssignmentToGroups.entrySet()) {
-            PrimSolver solver = new PrimSolver();
-            solver.construct(group.getValue().stream().mapToInt(Integer::intValue).toArray(), distanceMatrix);
-            //sumOfPenalties += solver.getPenalties();
-            solver.constructMeanOfDistance(group.getValue().stream().mapToInt(Integer::intValue).toArray(), distanceMatrix);
-            meanOfPenalties += solver.getMeanOfDistances();
-            preparedGroups.add(solver.getPath());
+        // Calculate penalties when enabled statistics
+        if (SHOW_STATISTICS) {
+            System.out.println("Mean of penalties for naive = " + new Judge().calcMeanDistance(elementsWithAssignmentToGroups, distanceMatrix));
         }
-        meanOfPenalties = meanOfPenalties / GROUPS;
-        System.out.println("Mean of penalties for naive = " + meanOfPenalties);
+
         return elementsWithAssignmentToGroups;
     }
 
     private HashMap<Integer, HashSet<Integer>> randomInitGroups(double[][] distanceMatrix, ArrayList<Integer> startIndexesList, ArrayList<PointCoordinates> coordinates) {
-        // k-means with static center
         HashMap<Integer, HashSet<Integer>> elementsWithAssignmentToGroups = new HashMap<>();
         Random random = new Random();
 
@@ -230,19 +220,11 @@ public class Main extends Application {
             }
         }
 
-        // Calculate sum of MSTs
-        HashSet<ArrayList<PointsPath>> preparedRandomGroups = new HashSet<>();
-        double meanOfPenalties = 0.0;
-        for (Map.Entry<Integer, HashSet<Integer>> group : elementsWithAssignmentToGroups.entrySet()) {
-            PrimSolver solver = new PrimSolver();
-            solver.construct(group.getValue().stream().mapToInt(Integer::intValue).toArray(), distanceMatrix);
-            //sumOfPenalties += solver.getPenalties();
-            solver.constructMeanOfDistance(group.getValue().stream().mapToInt(Integer::intValue).toArray(), distanceMatrix);
-            meanOfPenalties += solver.getMeanOfDistances();
-            preparedRandomGroups.add(solver.getPath());
+        // Calculate penalties when enabled statistics
+        if (SHOW_STATISTICS) {
+            System.out.println("Mean of penalties for random init = " + new Judge().calcMeanDistance(elementsWithAssignmentToGroups, distanceMatrix));
         }
-        meanOfPenalties = meanOfPenalties / GROUPS;
-        System.out.println("Mean of penalties for random init = " + meanOfPenalties);
+
         return elementsWithAssignmentToGroups;
     }
 
@@ -301,7 +283,7 @@ public class Main extends Application {
 
                         PrimSolver solver = new PrimSolver();
                         solver.construct(ints, distanceMatrix);
-                        solver.constructMeanOfDistance(ints, distanceMatrix);
+//                        solver.constructMeanOfDistance(ints, distanceMatrix);
                         //mstValues.get(point.getID()).set(index, solver.getPenalties());
                         mstValues.get(point.getID()).set(index, solver.getMeanOfDistances());
                     }
@@ -334,7 +316,7 @@ public class Main extends Application {
             PrimSolver solver = new PrimSolver();
             solver.construct(group.stream().mapToInt(Integer::intValue).toArray(), distanceMatrix);
             //sumPenaltiesRegret += solver.getPenalties();
-            solver.constructMeanOfDistance(group.stream().mapToInt(Integer::intValue).toArray(), distanceMatrix);
+//            solver.constructMeanOfDistance(group.stream().mapToInt(Integer::intValue).toArray(), distanceMatrix);
             meanPenaltiesRegret += solver.getMeanOfDistances();
             preparedRegretGroups.add(solver.getPath());
         }

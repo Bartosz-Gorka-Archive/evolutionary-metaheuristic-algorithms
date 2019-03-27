@@ -91,18 +91,6 @@ public class PrimSolver {
         this.calculatePenalties();
     }
 
-    public void constructMeanOfDistance(int[] indexes, double[][] distanceMatrix) {
-        double distancesSum = 0.0;
-        for (int i : indexes) {
-            for (int j : indexes) {
-                if (i != j) {
-                    distancesSum += distanceMatrix[i][j];
-                }
-            }
-        }
-        this.meanOfDistances = distancesSum / (2 * (indexes.length * indexes.length));
-    }
-
     /**
      * Calculate sum of penalties and store it in object's state
      */
