@@ -14,10 +14,8 @@ public class EuclideanDistance {
         double[][] distanceMatrix = new double[numberOfPoints][numberOfPoints];
 
         int row = 0;
-        int column = 0;
-
         for (PointCoordinates firstPoint : points) {
-            column = 0;
+            int column = 0;
             for (PointCoordinates secondPoint : points) {
                 distanceMatrix[row][column] = Math.sqrt(Math.pow(firstPoint.getX() - secondPoint.getX(), 2) +
                         Math.pow(firstPoint.getY() - secondPoint.getY(), 2));

@@ -8,6 +8,7 @@ public class PrimSolver {
     private double penalties;
     private double meanOfDistances;
     private ArrayList<PointsPath> path;
+
     /**
      * Get penalties sum - total distance
      *
@@ -16,6 +17,7 @@ public class PrimSolver {
     public double getPenalties() {
         return penalties;
     }
+
     public double getMeanOfDistances() {
         return meanOfDistances;
     }
@@ -91,8 +93,8 @@ public class PrimSolver {
 
     public void constructMeanOfDistance(int[] indexes, double[][] distanceMatrix) {
         double distancesSum = 0.0;
-        for (int i: indexes) {
-            for (int j: indexes) {
+        for (int i : indexes) {
+            for (int j : indexes) {
                 if (i != j) {
                     distancesSum += distanceMatrix[i][j];
                 }

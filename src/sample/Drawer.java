@@ -39,8 +39,8 @@ public class Drawer {
     /**
      * Draw instance as a graph
      *
-     * @param coordinates  Coordinates
-     * @param groups       PRIMs' solutions
+     * @param coordinates Coordinates
+     * @param groups      PRIMs' solutions
      */
     public void drawInputInstance(ArrayList<PointCoordinates> coordinates, HashSet<ArrayList<PointsPath>> groups) {
         Pane root = new Pane();

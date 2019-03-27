@@ -1,15 +1,10 @@
 package sample;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class GreedyLocalSolver {
     private List<ArrayList<Integer>> groups;
     private int groupsNumber;
-
-    public List<ArrayList<Integer>> getGroups() {
-        return groups;
-    }
 
     public GreedyLocalSolver(HashMap<Integer, HashSet<Integer>> g, int groupsNumber) {
         this.groupsNumber = groupsNumber;
@@ -18,11 +13,15 @@ public class GreedyLocalSolver {
         for (Map.Entry<Integer, HashSet<Integer>> group : g.entrySet()) {
             int[] groupList = group.getValue().stream().mapToInt(Integer::intValue).toArray();
             this.groups.add(new ArrayList<>());
-            for(int point: groupList) {
+            for (int point : groupList) {
                 this.groups.get(groupId).add(point);
             }
             groupId++;
         }
+    }
+
+    public List<ArrayList<Integer>> getGroups() {
+        return groups;
     }
 
     public List<ArrayList<Integer>> run(double[][] distanceMatrix) {
@@ -30,13 +29,13 @@ public class GreedyLocalSolver {
         int localMinimumsCount = 0;
         double[] previousMeanOfDistances = new double[groupsNumber];
         int i = 0;
-        for (ArrayList<Integer> group: groups) {
+        for (ArrayList<Integer> group : groups) {
             previousMeanOfDistances[i] = meanOfDistances(group, distanceMatrix);
             i++;
         }
 
         //do as long as points are moving from some groups
-        while(localMinimumsCount < groupsNumber) {
+        while (localMinimumsCount < groupsNumber) {
             int groupId = 0;
             int pointsCheckedCount = 0;
 
@@ -48,7 +47,7 @@ public class GreedyLocalSolver {
                 }
                 Random random = new Random();
                 int startPointId = random.nextInt(groups.get(groupId).size());
-                while (pointsCheckedCount < distanceMatrix.length){
+                while (pointsCheckedCount < distanceMatrix.length) {
 
                     random = new Random();
                     int targetGroupId = random.nextInt(groupsNumber);
@@ -69,8 +68,7 @@ public class GreedyLocalSolver {
                             previousMeanOfDistances[groupId] = meanOfDistances2;
                             //groups = new ArrayList<>(groupsTemp);
                             localMinimumsCount = -1;
-                        }
-                        else{
+                        } else {
                             groups.get(groupId).add(new Integer(groups.get(targetGroupId).get(groups.get(targetGroupId).size() - 1)));
                             groups.get(targetGroupId).remove(groups.get(targetGroupId).size() - 1);
                         }
@@ -90,13 +88,14 @@ public class GreedyLocalSolver {
         }
         return groups;
     }
+
     private double meanOfDistances(ArrayList<Integer> group, double[][] distanceMatrix) {
-        if(group.size() <= 1) {
+        if (group.size() <= 1) {
             return 0.0;
         }
         double distancesSum = 0.0;
-        for (int i: group) {
-            for (int j: group) {
+        for (int i : group) {
+            for (int j : group) {
                 if (i != j) {
                     distancesSum += distanceMatrix[i][j];
                 }

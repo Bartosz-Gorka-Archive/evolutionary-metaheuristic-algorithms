@@ -38,7 +38,7 @@ public class Main extends Application {
 
         double[] naiveGreedyResults = new double[TESTS_NUMBER], naiveSteepestResults = new double[TESTS_NUMBER],
                 randomGreedyResults = new double[TESTS_NUMBER], randomSteepestResults = new double[TESTS_NUMBER],
-                naiveGreedyTimes = new double[TESTS_NUMBER],naiveSteepestTimes = new double[TESTS_NUMBER],
+                naiveGreedyTimes = new double[TESTS_NUMBER], naiveSteepestTimes = new double[TESTS_NUMBER],
                 randomGreedyTimes = new double[TESTS_NUMBER], randomSteepestTimes = new double[TESTS_NUMBER];
         double bestNaiveGreedyResult = 999999.9, bestRandomGreedyResult = 99999.9, bestNaiveSteepestResult = 99999.9,
                 bestRandomSteepestResult = 99999.9;
@@ -149,7 +149,7 @@ public class Main extends Application {
         for (ArrayList<Integer> integers : algorithmResults) {
             int z = 0;
             int[] arr = new int[integers.size()];
-            for (Integer i: integers) {
+            for (Integer i : integers) {
                 arr[z] = i;
                 z++;
             }
@@ -160,7 +160,8 @@ public class Main extends Application {
         }
         return solver.getMeanOfDistances();
     }
-    private HashMap<Integer, HashSet<Integer>> naiveAlgorithm (double[][] distanceMatrix, ArrayList<Integer> startIndexesList, ArrayList<PointCoordinates> coordinates) {
+
+    private HashMap<Integer, HashSet<Integer>> naiveAlgorithm(double[][] distanceMatrix, ArrayList<Integer> startIndexesList, ArrayList<PointCoordinates> coordinates) {
         //NAIVE ALGORITHM
         // k-means with static center
         HashMap<Integer, HashSet<Integer>> elementsWithAssignmentToGroups = new HashMap<>();
@@ -206,7 +207,7 @@ public class Main extends Application {
         return elementsWithAssignmentToGroups;
     }
 
-    private HashMap<Integer, HashSet<Integer>> randomInitGroups (double[][] distanceMatrix, ArrayList<Integer> startIndexesList, ArrayList<PointCoordinates> coordinates) {
+    private HashMap<Integer, HashSet<Integer>> randomInitGroups(double[][] distanceMatrix, ArrayList<Integer> startIndexesList, ArrayList<PointCoordinates> coordinates) {
         //NAIVE ALGORITHM
         // k-means with static center
         HashMap<Integer, HashSet<Integer>> elementsWithAssignmentToGroups = new HashMap<>();
