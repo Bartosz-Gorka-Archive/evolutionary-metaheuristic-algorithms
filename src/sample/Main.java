@@ -8,7 +8,7 @@ import java.util.*;
 public class Main extends Application {
     private final static int GROUPS = 20;
     private final static int TESTS_NUMBER = 1;
-    private final static boolean SHOW_STATISTICS = true;
+    private final static boolean SHOW_STATISTICS = false;
 
     private HashSet<ArrayList<PointsPath>> preparedGroups;
     //For random algorithm init
@@ -57,12 +57,12 @@ public class Main extends Application {
             ArrayList<Integer> startIndexesList = new ArrayList<>(startIndexesSet);
 
             //Naive and random init instance
-            HashMap<Integer, HashSet<Integer>> naiveInstance = naiveAlgorithm(distanceMatrix, startIndexesList, coordinates);
-            HashMap<Integer, HashSet<Integer>> randomInstance = randomInitGroups(distanceMatrix, startIndexesList, coordinates);
+            HashMap<Integer, HashSet<Integer>> naiveInstances = naiveAlgorithm(distanceMatrix, startIndexesList, coordinates);
+            HashMap<Integer, HashSet<Integer>> randomInstances = randomInitGroups(distanceMatrix, startIndexesList, coordinates);
 
             //GREEDY NAIVE ALGORITHM
             long startTime = System.nanoTime();
-            GreedyLocalSolver naiveGreedyLocalSolver = new GreedyLocalSolver(naiveInstance, GROUPS);
+            GreedyLocalSolver naiveGreedyLocalSolver = new GreedyLocalSolver(naiveInstances, GROUPS);
             List<ArrayList<Integer>> naiveGreedyLocalResults = naiveGreedyLocalSolver.run(distanceMatrix);
             naiveGreedyResults[iteration] = solveLocalSearch(naiveGreedyLocalResults, distanceMatrix);
             if (naiveGreedyResults[iteration] < bestNaiveGreedyResult) {
@@ -73,7 +73,7 @@ public class Main extends Application {
 
             //GREEDY RANDOM ALGORITHM
             startTime = System.nanoTime();
-            GreedyLocalSolver randomGreedyLocalSolver = new GreedyLocalSolver(randomInstance, GROUPS);
+            GreedyLocalSolver randomGreedyLocalSolver = new GreedyLocalSolver(randomInstances, GROUPS);
             List<ArrayList<Integer>> randomGreedyLocalResults = randomGreedyLocalSolver.run(distanceMatrix);
             randomGreedyResults[iteration] = solveLocalSearch(randomGreedyLocalResults, distanceMatrix);
             if (randomGreedyResults[iteration] < bestRandomGreedyResult) {
@@ -84,7 +84,7 @@ public class Main extends Application {
 
             //STEEPEST NAIVE ALGORITHM
             startTime = System.nanoTime();
-            SteepestLocalSolver naiveSteepestLocalSolver = new SteepestLocalSolver(naiveInstance, GROUPS);
+            SteepestLocalSolver naiveSteepestLocalSolver = new SteepestLocalSolver(naiveInstances, GROUPS);
             List<ArrayList<Integer>> naiveSteepestLocalResults = naiveSteepestLocalSolver.run(distanceMatrix);
             naiveSteepestResults[iteration] = solveLocalSearch(naiveSteepestLocalResults, distanceMatrix);
             if (naiveSteepestResults[iteration] < bestNaiveSteepestResult) {
@@ -95,7 +95,7 @@ public class Main extends Application {
 
             //STEEPEST RANDOM ALGORITHM
             startTime = System.nanoTime();
-            SteepestLocalSolver randomSteepestLocalSolver = new SteepestLocalSolver(randomInstance, GROUPS);
+            SteepestLocalSolver randomSteepestLocalSolver = new SteepestLocalSolver(randomInstances, GROUPS);
             List<ArrayList<Integer>> randomSteepestLocalResults = randomSteepestLocalSolver.run(distanceMatrix);
             randomSteepestResults[iteration] = solveLocalSearch(randomSteepestLocalResults, distanceMatrix);
             if (randomSteepestResults[iteration] < bestRandomSteepestResult) {
@@ -211,19 +211,23 @@ public class Main extends Application {
     }
 
     private HashMap<Integer, HashSet<Integer>> randomInitGroups(double[][] distanceMatrix, ArrayList<Integer> startIndexesList, ArrayList<PointCoordinates> coordinates) {
-        //NAIVE ALGORITHM
         // k-means with static center
         HashMap<Integer, HashSet<Integer>> elementsWithAssignmentToGroups = new HashMap<>();
+        Random random = new Random();
 
         // Initialize groups
         for (int i = 0; i < GROUPS; i++) {
-            elementsWithAssignmentToGroups.put(i, new HashSet<>());
+            HashSet<Integer> set = new HashSet<>();
+            set.add(startIndexesList.get(i));
+            elementsWithAssignmentToGroups.put(i, set);
         }
 
         // Assign each point to group
         for (PointCoordinates point : coordinates) {
-            Random random = new Random();
-            elementsWithAssignmentToGroups.get(random.nextInt(GROUPS)).add(point.getID());
+            // Add point only when not in start
+            if (!startIndexesList.contains(point.getID())) {
+                elementsWithAssignmentToGroups.get(random.nextInt(GROUPS)).add(point.getID());
+            }
         }
 
         // Calculate sum of MSTs
