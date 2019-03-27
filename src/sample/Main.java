@@ -26,7 +26,7 @@ public class Main extends Application {
     @Override
     public void start(Stage primaryStage) {
         Reader reader = new Reader();
-        ArrayList<PointCoordinates> coordinates = reader.readInstance("objects20_06.data");
+        ArrayList<PointCoordinates> coordinates = reader.readInstance("instances/objects20_06.data");
 
         EuclideanDistance euclideanDistance = new EuclideanDistance();
         double[][] distanceMatrix = euclideanDistance.calculateDistanceMatrix(coordinates);
@@ -61,8 +61,8 @@ public class Main extends Application {
 
             //GREEDY NAIVE ALGORITHM
             long startTime = System.nanoTime();
-            GreedyLocalSolver naivemGreedyLocalSolver = new GreedyLocalSolver(naiveInstance, GROUPS);
-            List<ArrayList<Integer>> naiveGreedyLocalResults = naivemGreedyLocalSolver.run(distanceMatrix);
+            GreedyLocalSolver naiveGreedyLocalSolver = new GreedyLocalSolver(naiveInstance, GROUPS);
+            List<ArrayList<Integer>> naiveGreedyLocalResults = naiveGreedyLocalSolver.run(distanceMatrix);
             naiveGreedyResults[iteration] = solveLocalSearch(naiveGreedyLocalResults, distanceMatrix);
             if (naiveGreedyResults[iteration] < bestNaiveGreedyResult) {
                 bestNaiveGreedyResult = naiveGreedyResults[iteration];
