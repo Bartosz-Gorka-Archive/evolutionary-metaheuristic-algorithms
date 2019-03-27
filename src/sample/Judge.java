@@ -22,6 +22,6 @@ public class Judge {
             }
         }
 
-        return sumOfDistances / totalArcs;
+        return sumOfDistances / (totalArcs > 0 ? totalArcs : 1);
     }
 }
