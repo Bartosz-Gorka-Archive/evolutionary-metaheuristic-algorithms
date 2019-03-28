@@ -63,7 +63,8 @@ public class Judge {
         return this.sumOfDistances / (this.totalArcs > 0 ? this.totalArcs : 1);
     }
 
-    public double getChangedDistance() {
-        return changedDistance;
+    public double tempMeanDistance() {
+        int arcs = this.totalArcs + this.changedArcs;
+        return (this.sumOfDistances + this.changedDistance) / (arcs > 0 ? arcs : 1);
     }
 }

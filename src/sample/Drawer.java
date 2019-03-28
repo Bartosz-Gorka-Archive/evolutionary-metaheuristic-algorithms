@@ -15,9 +15,10 @@ import java.util.HashSet;
 /*
  * TODO list
  *  add different colors
+ *  title
  */
 public class Drawer {
-    Color[] colors = {
+    private Color[] colors = {
             Color.RED,
             Color.BLUE,
             Color.GOLD,

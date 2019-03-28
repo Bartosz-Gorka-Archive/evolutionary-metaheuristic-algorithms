@@ -7,18 +7,8 @@ import java.util.*;
 
 public class Main extends Application {
     private final static int GROUPS = 20;
-    private final static int TESTS_NUMBER = 10;
+    private final static int TESTS_NUMBER = 1;
     private final static boolean SHOW_STATISTICS = true;
-
-    private HashSet<ArrayList<PointsPath>> preparedGroups;
-    //For random algorithm init
-    private HashSet<ArrayList<PointsPath>> bestRandomGroups;
-    //For regret algorithm
-    private HashSet<ArrayList<PointsPath>> bestRegretGroups;
-    //For steepest local algorithm
-    private HashSet<ArrayList<PointsPath>> bestSteepestGroups;
-    //For steepest local algorithm
-    private HashSet<ArrayList<PointsPath>> bestGreedyGroups;
 
     public static void main(String[] args) {
         launch(args);
@@ -91,66 +81,70 @@ public class Main extends Application {
             }
             randomGreedyTimes[iteration] = System.nanoTime() - startTime;
 
-//            //STEEPEST NAIVE ALGORITHM
-//            startTime = System.nanoTime();
-//            SteepestLocalSolver naiveSteepestLocalSolver = new SteepestLocalSolver(naiveInstances, GROUPS);
-//            List<ArrayList<Integer>> naiveSteepestLocalResults = naiveSteepestLocalSolver.run(distanceMatrix);
-//            naiveSteepestResults[iteration] = solveLocalSearch(naiveSteepestLocalResults, distanceMatrix);
-//            if (naiveSteepestResults[iteration] < bestNaiveSteepestResult) {
-//                bestNaiveSteepestResult = naiveSteepestResults[iteration];
-//                bestNaiveSteepestGroups = preparedGroups;
-//            }
-//            naiveSteepestTimes[iteration] = System.nanoTime() - startTime;
-//
-//            //STEEPEST RANDOM ALGORITHM
-//            startTime = System.nanoTime();
-//            SteepestLocalSolver randomSteepestLocalSolver = new SteepestLocalSolver(randomInstances, GROUPS);
-//            List<ArrayList<Integer>> randomSteepestLocalResults = randomSteepestLocalSolver.run(distanceMatrix);
-//            randomSteepestResults[iteration] = solveLocalSearch(randomSteepestLocalResults, distanceMatrix);
-//            if (randomSteepestResults[iteration] < bestRandomSteepestResult) {
-//                bestRandomSteepestResult = randomSteepestResults[iteration];
-//                bestRandomSteepestGroups = preparedGroups;
-//            }
-//            randomSteepestTimes[iteration] = System.nanoTime() - startTime;
+            /*
+             * STEEPEST NAIVE
+             */
+            startTime = System.nanoTime();
+            SteepestLocalSolver naiveSteepestLocalSolver = new SteepestLocalSolver(naiveInstances);
+            naiveSteepestLocalSolver.run(distanceMatrix);
+            naiveSteepestResults[iteration] = naiveSteepestLocalSolver.getPenalties();
+            if (naiveSteepestLocalSolver.getPenalties() < bestNaiveSteepestResult) {
+                bestNaiveSteepestResult = naiveSteepestLocalSolver.getPenalties();
+                bestNaiveSteepestGroups = castLocalSearchToGraph(naiveSteepestLocalSolver.getGroups(), distanceMatrix);
+            }
+            naiveSteepestTimes[iteration] = System.nanoTime() - startTime;
+
+            /*
+             * STEEPEST RANDOM
+             */
+            startTime = System.nanoTime();
+            SteepestLocalSolver randomSteepestLocalSolver = new SteepestLocalSolver(randomInstances);
+            randomSteepestLocalSolver.run(distanceMatrix);
+            randomSteepestResults[iteration] = randomSteepestLocalSolver.getPenalties();
+            if (randomSteepestLocalSolver.getPenalties() < bestRandomSteepestResult) {
+                bestRandomSteepestResult = randomSteepestLocalSolver.getPenalties();
+                bestRandomSteepestGroups = castLocalSearchToGraph(randomSteepestLocalSolver.getGroups(), distanceMatrix);
+            }
+            randomSteepestTimes[iteration] = System.nanoTime() - startTime;
         }
 
         // Show groups on graph
         new Drawer().drawInputInstance(coordinates, bestNaiveGreedyGroups);
         new Drawer().drawInputInstance(coordinates, bestRandomGreedyGroups);
-//        new Drawer().drawInputInstance(coordinates, bestRandomSteepestGroups);
-//        new Drawer().drawInputInstance(coordinates, bestNaiveSteepestGroups);
+        new Drawer().drawInputInstance(coordinates, bestRandomSteepestGroups);
+        new Drawer().drawInputInstance(coordinates, bestNaiveSteepestGroups);
 
         if (SHOW_STATISTICS) {
             System.out.println("Min result for naive greedy = " + bestNaiveGreedyResult);
             System.out.println("Min result for random greedy = " + bestRandomGreedyResult);
-//            System.out.println("Min result for naive steepest = " + bestNaiveSteepestResult);
-//            System.out.println("Min result for random steepest = " + bestRandomSteepestResult);
+            System.out.println("Min result for naive steepest = " + bestNaiveSteepestResult);
+            System.out.println("Min result for random steepest = " + bestRandomSteepestResult);
 
             System.out.println("Mean result for naive greedy = " + Arrays.stream(naiveGreedyResults).average().getAsDouble());
             System.out.println("Mean result for random greedy = " + Arrays.stream(randomGreedyResults).average().getAsDouble());
-//            System.out.println("Mean result for naive steepest = " + Arrays.stream(naiveSteepestResults).average().getAsDouble());
-//            System.out.println("Mean result for random steepest = " + Arrays.stream(randomSteepestResults).average().getAsDouble());
+            System.out.println("Mean result for naive steepest = " + Arrays.stream(naiveSteepestResults).average().getAsDouble());
+            System.out.println("Mean result for random steepest = " + Arrays.stream(randomSteepestResults).average().getAsDouble());
 
             System.out.println("Max result for naive greedy = " + Arrays.stream(naiveGreedyResults).max().getAsDouble());
             System.out.println("Max result for random greedy = " + Arrays.stream(randomGreedyResults).max().getAsDouble());
-//            System.out.println("Max result for naive steepest = " + Arrays.stream(naiveSteepestResults).max().getAsDouble());
-//            System.out.println("Max result for random steepest = " + Arrays.stream(randomSteepestResults).max().getAsDouble());
+            System.out.println("Max result for naive steepest = " + Arrays.stream(naiveSteepestResults).max().getAsDouble());
+            System.out.println("Max result for random steepest = " + Arrays.stream(randomSteepestResults).max().getAsDouble());
 
             System.out.println("TIMING:");
             System.out.println("Min time for naive greedy = " + Arrays.stream(naiveGreedyTimes).min().getAsDouble());
             System.out.println("Min time for random greedy = " + Arrays.stream(randomGreedyTimes).min().getAsDouble());
-//            System.out.println("Min time for naive steepest = " + Arrays.stream(naiveSteepestTimes).min().getAsDouble());
-//            System.out.println("Min time for random steepest = " + Arrays.stream(randomSteepestTimes).min().getAsDouble());
+            System.out.println("Min time for naive steepest = " + Arrays.stream(naiveSteepestTimes).min().getAsDouble());
+            System.out.println("Min time for random steepest = " + Arrays.stream(randomSteepestTimes).min().getAsDouble());
 
             System.out.println("Mean time for  naive greedy = " + Arrays.stream(naiveGreedyTimes).average().getAsDouble());
             System.out.println("Mean time for random greedy = " + Arrays.stream(randomGreedyTimes).average().getAsDouble());
-//            System.out.println("Mean time for naive steepest = " + Arrays.stream(naiveSteepestTimes).average().getAsDouble());
-//            System.out.println("Mean time for random steepest = " + Arrays.stream(randomSteepestTimes).average().getAsDouble());
+            System.out.println("Mean time for naive steepest = " + Arrays.stream(naiveSteepestTimes).average().getAsDouble());
+            System.out.println("Mean time for random steepest = " + Arrays.stream(randomSteepestTimes).average().getAsDouble());
 
             System.out.println("Max time for naive greedy = " + Arrays.stream(naiveGreedyTimes).max().getAsDouble());
             System.out.println("Max time for random greedy = " + Arrays.stream(randomGreedyTimes).max().getAsDouble());
-//            System.out.println("Max time for naive steepest = " + Arrays.stream(naiveSteepestTimes).max().getAsDouble());
-//            System.out.println("Max time for random steepest = " + Arrays.stream(randomSteepestTimes).max().getAsDouble());
+            System.out.println("Max time for naive steepest = " + Arrays.stream(naiveSteepestTimes).max().getAsDouble());
+            System.out.println("Max time for random steepest = " + Arrays.stream(randomSteepestTimes).max().getAsDouble());
         }
     }
 

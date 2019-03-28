@@ -7,7 +7,11 @@ public class GreedyLocalSolver {
     private double penalties;
 
     public GreedyLocalSolver(HashMap<Integer, HashSet<Integer>> groups) {
-        this.groups = (HashMap<Integer, HashSet<Integer>>) groups.clone();
+        this.groups = new HashMap<>();
+        for (Map.Entry<Integer, HashSet<Integer>> entry : groups.entrySet()) {
+            HashSet<Integer> set = new HashSet<>(entry.getValue());
+            this.groups.put(entry.getKey(), set);
+        }
     }
 
     public void run(double[][] distanceMatrix) {
@@ -42,7 +46,7 @@ public class GreedyLocalSolver {
                 judge.calculateChangedDistance(this.groups, move, distanceMatrix);
 
                 // Move decremented current penalties - use it
-                if (judge.getChangedDistance() < 0) {
+                if (judge.tempMeanDistance() < this.penalties) {
                     // Save changes in groups
                     Integer pointID = move[0];
                     this.groups.get(move[1]).remove(pointID);

@@ -1,102 +1,84 @@
 package sample;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
 
 public class SteepestLocalSolver {
-    private List<ArrayList<Integer>> groups;
-    private int groupsNumber;
+    private HashMap<Integer, HashSet<Integer>> groups;
+    private double penalties;
 
-    public SteepestLocalSolver(HashMap<Integer, HashSet<Integer>> g, int groupsNumber) {
-        this.groupsNumber = groupsNumber;
-        this.groups = new ArrayList<>();
-        int groupId = 0;
-        for (Map.Entry<Integer, HashSet<Integer>> group : g.entrySet()) {
-            int[] groupList = group.getValue().stream().mapToInt(Integer::intValue).toArray();
-            this.groups.add(new ArrayList<>());
-            for (int point : groupList) {
-                this.groups.get(groupId).add(point);
-            }
-            groupId++;
+    public SteepestLocalSolver(HashMap<Integer, HashSet<Integer>> groups) {
+        this.groups = new HashMap<>();
+        for (Map.Entry<Integer, HashSet<Integer>> entry : groups.entrySet()) {
+            HashSet<Integer> set = new HashSet<>(entry.getValue());
+            this.groups.put(entry.getKey(), set);
         }
     }
 
-    public List<ArrayList<Integer>> getGroups() {
-        return groups;
-    }
+    public void run(double[][] distanceMatrix) {
+        // Flag - penalties changed
+        boolean penaltiesChanged = true;
 
-    public List<ArrayList<Integer>> run(double[][] distanceMatrix) {
+        // Prepare basic penalties - reference
+        Judge judge = new Judge();
+        this.penalties = judge.calcMeanDistance(this.groups, distanceMatrix);
 
-        double[] bestMeanOfDistances = new double[groupsNumber];
-        int i = 0;
-        for (ArrayList<Integer> group : groups) {
-            bestMeanOfDistances[i] = meanOfDistances(group, distanceMatrix);
-            i++;
-        }
-        int srcId = -1, destId = -1, srcGroup = -1, destGroup = -1;
+        while (penaltiesChanged) {
+            double bestPenalties = this.penalties;
+            int[] bestMove = {-1, -1, -1};
+            penaltiesChanged = false;
 
-        //do as long as points are moving from some groups
-        while (true) {
-            if (srcGroup != -1) {
-                groups.get(destGroup).add(groups.get(srcGroup).get(srcId));
-                groups.get(srcGroup).remove(srcId);
-                srcId = -1;
-                destId = -1;
-                srcGroup = -1;
-                destGroup = -1;
-            }
-            //for each group
-            int group1Id = 0;
-            for (ArrayList<Integer> group1 : groups) {
-                int group2Id = 0;
-                for (ArrayList<Integer> group2 : groups) {
-                    for (i = 0; i < group1.size(); i++) {
-                        //do not move points from group to the same one
-                        if (group1 == group2) {
-                            continue;
-                        }
-                        //move from 1 to 2
-                        group2.add(group1.get(i));
-                        group1.remove(i);
-                        double meanOfDistances1 = meanOfDistances(group1, distanceMatrix);
-                        double meanOfDistances2 = meanOfDistances(group2, distanceMatrix);
-
-                        if (meanOfDistances1 + meanOfDistances2 <
-                                bestMeanOfDistances[group1Id] + bestMeanOfDistances[group2Id]) {
-                            bestMeanOfDistances[group1Id] = meanOfDistances1;
-                            bestMeanOfDistances[group2Id] = meanOfDistances2;
-                            srcId = i;
-                            destId = group2.size() - 1;
-                            srcGroup = group1Id;
-                            destGroup = group2Id;
-                        } else {
-                            group1.add(group2.get(group2.size() - 1));
-                            group2.remove(group2.size() - 1);
+            // Prepare potential moves
+            ArrayList<int[]> moves = new ArrayList<>();
+            for (Map.Entry<Integer, HashSet<Integer>> entry : this.groups.entrySet()) {
+                for (Integer id : entry.getValue()) {
+                    for (int groupId : this.groups.keySet()) {
+                        if (groupId != entry.getKey()) {
+                            int[] record = {id, entry.getKey(), groupId};
+                            moves.add(record);
                         }
                     }
-                    group2Id++;
-                }
-                group1Id++;
-            }
-            if (srcGroup != -1) {
-                break;
-            }
-        }
-        return groups;
-    }
-
-    private double meanOfDistances(ArrayList<Integer> group, double[][] distanceMatrix) {
-        if (group.size() <= 1) {
-            return 0.0;
-        }
-        double distancesSum = 0.0;
-        for (int i : group) {
-            for (int j : group) {
-                if (i != j) {
-                    distancesSum += distanceMatrix[i][j];
                 }
             }
+
+            // Check moves
+            for (int[] move : moves) {
+                judge.calculateChangedDistance(this.groups, move, distanceMatrix);
+
+                // Verify move
+                if (judge.tempMeanDistance() < bestPenalties) {
+                    bestPenalties = judge.tempMeanDistance();
+                    bestMove[0] = move[0];
+                    bestMove[1] = move[1];
+                    bestMove[2] = move[2];
+                    System.out.println("SELECTED BEST MOVE");
+                }
+            }
+
+            // Apply best move
+            if (bestMove[0] != -1) {
+                // Save changes in groups
+                Integer pointID = bestMove[0];
+                this.groups.get(bestMove[1]).remove(pointID);
+                this.groups.get(bestMove[2]).add(pointID);
+
+                judge.calculateChangedDistance(this.groups, bestMove, distanceMatrix);
+                this.penalties = judge.updateDistance();
+                System.out.println("CHANGED");
+
+                // Enable next iteration
+                penaltiesChanged = true;
+            }
         }
-        return distancesSum / (2 * (group.size() * group.size()));
     }
 
+    public HashMap<Integer, HashSet<Integer>> getGroups() {
+        return this.groups;
+    }
+
+    public double getPenalties() {
+        return penalties;
+    }
 }
