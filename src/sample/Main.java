@@ -109,10 +109,10 @@ public class Main extends Application {
         }
 
         // Show groups on graph
-        new Drawer().drawInputInstance(coordinates, bestNaiveGreedyGroups);
-        new Drawer().drawInputInstance(coordinates, bestRandomGreedyGroups);
-        new Drawer().drawInputInstance(coordinates, bestRandomSteepestGroups);
-        new Drawer().drawInputInstance(coordinates, bestNaiveSteepestGroups);
+        new Drawer().drawInputInstance(coordinates, bestNaiveGreedyGroups, "Naive greedy");
+        new Drawer().drawInputInstance(coordinates, bestRandomGreedyGroups, "Random greedy");
+        new Drawer().drawInputInstance(coordinates, bestRandomSteepestGroups, "Random steepest");
+        new Drawer().drawInputInstance(coordinates, bestNaiveSteepestGroups, "Naive steepest");
 
         if (SHOW_STATISTICS) {
             System.out.println("Min result for naive greedy = " + bestNaiveGreedyResult);
@@ -355,6 +355,6 @@ public class Main extends Application {
         preparedFinalGroups.add(primSolver.getPath());
 
         // Draw solution as a graph
-        new Drawer().drawInputInstance(coordinates, preparedFinalGroups);
+        new Drawer().drawInputInstance(coordinates, preparedFinalGroups, "MST");
     }
 }

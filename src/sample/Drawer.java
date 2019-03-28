@@ -1,6 +1,7 @@
 package sample;
 
 import javafx.scene.Scene;
+import javafx.scene.control.Label;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
@@ -12,42 +13,38 @@ import javafx.stage.Stage;
 import java.util.ArrayList;
 import java.util.HashSet;
 
-/*
- * TODO list
- *  add different colors
- *  title
- */
 public class Drawer {
     private Color[] colors = {
             Color.RED,
+            Color.AQUA,
             Color.BLUE,
             Color.GOLD,
             Color.BLACK,
-            Color.SIENNA,
+            Color.BROWN,
+            Color.CORAL,
             Color.SILVER,
             Color.YELLOW,
             Color.VIOLET,
+            Color.PURPLE,
             Color.SKYBLUE,
+            Color.DEEPPINK,
+            Color.SEAGREEN,
+            Color.CADETBLUE,
+            Color.AQUAMARINE,
+            Color.BLUEVIOLET,
+            Color.YELLOWGREEN,
             Color.SPRINGGREEN,
-            Color.RED,
-            Color.BLUE,
-            Color.GOLD,
-            Color.BLACK,
-            Color.SIENNA,
-            Color.SILVER,
-            Color.YELLOW,
-            Color.VIOLET,
-            Color.SKYBLUE,
-            Color.SPRINGGREEN
+            Color.CORNFLOWERBLUE
     };
 
     /**
      * Draw instance as a graph
      *
      * @param coordinates Coordinates
-     * @param groups      PRIMs' solutions
+     * @param groups      Solutions
+     * @param title       Graph's title
      */
-    public void drawInputInstance(ArrayList<PointCoordinates> coordinates, HashSet<ArrayList<PointsPath>> groups) {
+    public void drawInputInstance(ArrayList<PointCoordinates> coordinates, HashSet<ArrayList<PointsPath>> groups, String title) {
         Pane root = new Pane();
         Path path = new Path();
         path.setSmooth(true);
@@ -75,6 +72,12 @@ public class Drawer {
 
             groupColorID++;
         }
+
+        // Title
+        Label titleLabel = new Label();
+        titleLabel.setText(title);
+        titleLabel.relocate(2.0, 1.0);
+        root.getChildren().add(titleLabel);
 
         // Prepare path on scene
         root.getChildren().add(path);

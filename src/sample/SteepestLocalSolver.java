@@ -53,7 +53,6 @@ public class SteepestLocalSolver {
                     bestMove[0] = move[0];
                     bestMove[1] = move[1];
                     bestMove[2] = move[2];
-                    System.out.println("SELECTED BEST MOVE");
                 }
             }
 
@@ -66,7 +65,6 @@ public class SteepestLocalSolver {
 
                 judge.calculateChangedDistance(this.groups, bestMove, distanceMatrix);
                 this.penalties = judge.updateDistance();
-                System.out.println("CHANGED");
 
                 // Enable next iteration
                 penaltiesChanged = true;
