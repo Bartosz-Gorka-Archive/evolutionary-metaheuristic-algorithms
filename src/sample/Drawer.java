@@ -12,6 +12,10 @@ import javafx.stage.Stage;
 import java.util.ArrayList;
 import java.util.HashSet;
 
+/*
+ * TODO list
+ *  add different colors
+ */
 public class Drawer {
     Color[] colors = {
             Color.RED,

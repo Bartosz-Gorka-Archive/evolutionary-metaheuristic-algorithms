@@ -2,12 +2,6 @@ package sample;
 
 import java.util.*;
 
-/*
- * TODO list
- *  penalties as delta
- *  clever move from group to another group
- */
-
 public class GreedyLocalSolver {
     private HashMap<Integer, HashSet<Integer>> groups;
     private double penalties;
@@ -19,6 +13,10 @@ public class GreedyLocalSolver {
     public void run(double[][] distanceMatrix) {
         // Flag - penalties changed
         boolean penaltiesChanged = true;
+
+        // Prepare basic penalties - reference
+        Judge judge = new Judge();
+        this.penalties = judge.calcMeanDistance(this.groups, distanceMatrix);
 
         while (penaltiesChanged) {
             penaltiesChanged = false;
@@ -39,22 +37,23 @@ public class GreedyLocalSolver {
             // Random order
             Collections.shuffle(moves);
 
-            // Prepare basic penalties - reference
-            this.penalties = new Judge().calcMeanDistance(this.groups, distanceMatrix);
-
             // Apply move
             for (int[] move : moves) {
-                Integer pointID = move[0];
-                this.groups.get(move[1]).remove(pointID);
-                this.groups.get(move[2]).add(pointID);
+                judge.calculateChangedDistance(this.groups, move, distanceMatrix);
 
-                double newPenalties = new Judge().calcMeanDistance(this.groups, distanceMatrix);
-                if (newPenalties < this.penalties) {
+                // Move decremented current penalties - use it
+                if (judge.getChangedDistance() < 0) {
+                    // Save changes in groups
+                    Integer pointID = move[0];
+                    this.groups.get(move[1]).remove(pointID);
+                    this.groups.get(move[2]).add(pointID);
+
+                    // Apply changes in penalties
+                    this.penalties = judge.updateDistance();
+
+                    // Enable next iteration
                     penaltiesChanged = true;
                     break;
-                } else {
-                    this.groups.get(move[1]).add(pointID);
-                    this.groups.get(move[2]).remove(pointID);
                 }
             }
         }
