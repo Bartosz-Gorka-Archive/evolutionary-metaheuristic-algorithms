@@ -4,10 +4,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.Label;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
-import javafx.scene.shape.Circle;
-import javafx.scene.shape.LineTo;
-import javafx.scene.shape.MoveTo;
-import javafx.scene.shape.Path;
+import javafx.scene.shape.*;
 import javafx.stage.Stage;
 
 import java.util.ArrayList;
@@ -22,9 +19,9 @@ public class Drawer {
             Color.AQUA,
             Color.BLUE,
             Color.GOLD,
-            Color.BLACK,
             Color.BROWN,
             Color.CORAL,
+            Color.ORANGE,
             Color.SILVER,
             Color.YELLOW,
             Color.VIOLET,
@@ -46,34 +43,70 @@ public class Drawer {
      * @param coordinates Coordinates
      * @param groups      Solutions
      * @param title       Graph's title
+     * @param isMST       Is MST graph flag
+     * @param showLines   Should we show lines between points?
      */
-    public void drawInputInstance(ArrayList<PointCoordinates> coordinates, HashSet<ArrayList<PointsPath>> groups, String title) {
+    public void drawInputInstance(ArrayList<PointCoordinates> coordinates, HashSet<ArrayList<PointsPath>> groups, String title, boolean isMST, boolean showLines) {
         Pane root = new Pane();
-        Path path = new Path();
-        path.setSmooth(true);
+        if (isMST) {
+            Path path = new Path();
+            path.setSmooth(true);
 
-        // Draw lines on the graph
-        int groupColorID = 0;
-        for (ArrayList<PointsPath> group : groups) {
-            Color selectedColor = colors[groupColorID];
-            for (PointsPath route : group) {
-                PointCoordinates startPoint = coordinates.get(route.getStartIndex());
-                PointCoordinates endPoint = coordinates.get(route.getEndIndex());
+            // Draw lines on the graph
+            int groupColorID = 0;
+            for (ArrayList<PointsPath> group : groups) {
+                Color selectedColor = colors[groupColorID];
+                for (PointsPath route : group) {
+                    PointCoordinates startPoint = coordinates.get(route.getStartIndex());
+                    PointCoordinates endPoint = coordinates.get(route.getEndIndex());
 
-                // Move to start X, start Y
-                path.getElements().add(new MoveTo(startPoint.getX() * 2 + 20, startPoint.getY() * 2 + 20));
-                Circle startCircle = new Circle(2, selectedColor);
-                startCircle.relocate(startPoint.getX() * 2 + 18, startPoint.getY() * 2 + 18);
-                root.getChildren().add(startCircle);
+                    // Move to start X, start Y
+                    if (showLines) {
+                        path.getElements().add(new MoveTo(startPoint.getX() * 2 + 20, startPoint.getY() * 2 + 20));
+                    }
+                    Circle startCircle = new Circle(2, selectedColor);
+                    startCircle.relocate(startPoint.getX() * 2 + 18, startPoint.getY() * 2 + 18);
+                    root.getChildren().add(startCircle);
 
-                // Add line to end X, end Y
-                path.getElements().add(new LineTo(endPoint.getX() * 2 + 20, endPoint.getY() * 2 + 20));
-                Circle endCircle = new Circle(2, selectedColor);
-                endCircle.relocate(endPoint.getX() * 2 + 18, endPoint.getY() * 2 + 18);
-                root.getChildren().add(endCircle);
+                    // Add line to end X, end Y
+                    if (showLines) {
+                        path.getElements().add(new LineTo(endPoint.getX() * 2 + 20, endPoint.getY() * 2 + 20));
+                    }
+                    Circle endCircle = new Circle(2, selectedColor);
+                    endCircle.relocate(endPoint.getX() * 2 + 18, endPoint.getY() * 2 + 18);
+                    root.getChildren().add(endCircle);
+                }
+
+                groupColorID++;
             }
 
-            groupColorID++;
+            // Prepare path on scene
+            root.getChildren().add(path);
+        } else {
+            // Draw lines on the graph
+            int groupColorID = 0;
+            for (ArrayList<PointsPath> group : groups) {
+                Color selectedColor = colors[groupColorID];
+                for (PointsPath route : group) {
+                    PointCoordinates startPoint = coordinates.get(route.getStartIndex());
+                    PointCoordinates endPoint = coordinates.get(route.getEndIndex());
+
+                    Line line = new Line(startPoint.getX() * 2 + 20, startPoint.getY() * 2 + 20, endPoint.getX() * 2 + 20, endPoint.getY() * 2 + 20);
+                    line.setSmooth(true);
+                    line.setStroke(selectedColor);
+                    root.getChildren().add(line);
+
+                    Circle startCircle = new Circle(2, Color.BLACK);
+                    startCircle.relocate(startPoint.getX() * 2 + 18, startPoint.getY() * 2 + 18);
+                    root.getChildren().add(startCircle);
+
+                    Circle endCircle = new Circle(2, Color.BLACK);
+                    endCircle.relocate(endPoint.getX() * 2 + 18, endPoint.getY() * 2 + 18);
+                    root.getChildren().add(endCircle);
+                }
+
+                groupColorID++;
+            }
         }
 
         // Title
@@ -82,13 +115,10 @@ public class Drawer {
         titleLabel.relocate(2.0, 1.0);
         root.getChildren().add(titleLabel);
 
-        // Prepare path on scene
-        root.getChildren().add(path);
-
         // Set scene
         Stage stage = new Stage();
-        Scene scene = new Scene(root, 700, 600);
-        stage.setTitle("Points connections");
+        Scene scene = new Scene(root, 600, 600);
+        stage.setTitle(title);
         stage.setScene(scene);
         stage.show();
     }
