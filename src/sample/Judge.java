@@ -4,11 +4,30 @@ import java.util.HashMap;
 import java.util.HashSet;
 
 public class Judge {
+    /**
+     * Total arcs in assignment
+     */
     private int totalArcs;
+    /**
+     * Sum of distances - connections
+     */
     private double sumOfDistances;
+    /**
+     * Sum of changes in connections. Can be negative and positive value.
+     */
     private int changedArcs;
+    /**
+     * Sum of changed (amount) distance
+     */
     private double changedDistance;
 
+    /**
+     * Calculate mean distance in connections. Sum of distances / total arcs
+     *
+     * @param groups         Assignment
+     * @param distanceMatrix Distance matrix
+     * @return Mean distance
+     */
     public double calcMeanDistance(HashMap<Integer, HashSet<Integer>> groups, double[][] distanceMatrix) {
         this.sumOfDistances = 0.0;
         this.totalArcs = 0;
@@ -30,6 +49,11 @@ public class Judge {
         return this.sumOfDistances / (this.totalArcs > 0 ? this.totalArcs : 1);
     }
 
+    /**
+     * @param groups         Assignment
+     * @param changes        Move, format [point ID, previous group ID, new group ID]
+     * @param distanceMatrix Distance matrix
+     */
     public void calculateChangedDistance(HashMap<Integer, HashSet<Integer>> groups, int[] changes, double[][] distanceMatrix) {
         this.changedDistance = 0.0;
         this.changedArcs = 0;
@@ -56,6 +80,11 @@ public class Judge {
         }
     }
 
+    /**
+     * Update mean distance stored in Judge structure
+     *
+     * @return Mean distance after changes
+     */
     public double updateDistance() {
         this.sumOfDistances += this.changedDistance;
         this.totalArcs += this.changedArcs;
@@ -63,6 +92,9 @@ public class Judge {
         return this.sumOfDistances / (this.totalArcs > 0 ? this.totalArcs : 1);
     }
 
+    /**
+     * @return Changed distance (mean distance format)
+     */
     public double tempMeanDistance() {
         int arcs = this.totalArcs + this.changedArcs;
         return (this.sumOfDistances + this.changedDistance) / (arcs > 0 ? arcs : 1);

@@ -1,8 +1,17 @@
 package sample;
 
 public class PointsPath implements Comparable<PointsPath> {
+    /**
+     * Point ID - start route
+     */
     private int startIndex;
+    /**
+     * Point ID - end route
+     */
     private int endIndex;
+    /**
+     * Distance between cords
+     */
     private double penalties;
 
     /**
@@ -56,14 +65,5 @@ public class PointsPath implements Comparable<PointsPath> {
      */
     public int getEndIndex() {
         return this.endIndex;
-    }
-
-    /**
-     * Get distance as a penalties
-     *
-     * @return Distance value
-     */
-    public double getPenalties() {
-        return penalties;
     }
 }
