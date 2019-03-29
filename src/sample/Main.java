@@ -31,10 +31,14 @@ public class Main extends Application {
         EuclideanDistance euclideanDistance = new EuclideanDistance();
         double[][] distanceMatrix = euclideanDistance.calculateDistanceMatrix(coordinates);
 
-        HashSet<ArrayList<PointsPath>> bestNaiveGreedyGroups = new HashSet<>();
-        HashSet<ArrayList<PointsPath>> bestNaiveSteepestGroups = new HashSet<>();
-        HashSet<ArrayList<PointsPath>> bestRandomGreedyGroups = new HashSet<>();
-        HashSet<ArrayList<PointsPath>> bestRandomSteepestGroups = new HashSet<>();
+        HashSet<ArrayList<PointsPath>> bestNaiveGreedyGroupsMST = new HashSet<>();
+        HashSet<ArrayList<PointsPath>> bestNaiveGreedyGroupsConnections = new HashSet<>();
+        HashSet<ArrayList<PointsPath>> bestNaiveSteepestGroupsMST = new HashSet<>();
+        HashSet<ArrayList<PointsPath>> bestNaiveSteepestGroupsConnections = new HashSet<>();
+        HashSet<ArrayList<PointsPath>> bestRandomGreedyGroupsMST = new HashSet<>();
+        HashSet<ArrayList<PointsPath>> bestRandomGreedyGroupsConnections = new HashSet<>();
+        HashSet<ArrayList<PointsPath>> bestRandomSteepestGroupsMST = new HashSet<>();
+        HashSet<ArrayList<PointsPath>> bestRandomSteepestGroupsConnections = new HashSet<>();
 
         double[] naiveGreedyResults = new double[TESTS_NUMBER], naiveSteepestResults = new double[TESTS_NUMBER],
                 randomGreedyResults = new double[TESTS_NUMBER], randomSteepestResults = new double[TESTS_NUMBER],
@@ -73,7 +77,8 @@ public class Main extends Application {
             naiveGreedyResults[iteration] = naiveGreedyLocalSolver.getPenalties();
             if (naiveGreedyLocalSolver.getPenalties() < bestNaiveGreedyResult) {
                 bestNaiveGreedyResult = naiveGreedyLocalSolver.getPenalties();
-                bestNaiveGreedyGroups = castLocalSearchToGraph(naiveGreedyLocalSolver.getGroups(), distanceMatrix);
+                bestNaiveGreedyGroupsMST = castLocalSearchToMSTGraph(naiveGreedyLocalSolver.getGroups(), distanceMatrix);
+                bestNaiveGreedyGroupsConnections = castLocalSearchToConnectionGraph(naiveGreedyLocalSolver.getGroups(), distanceMatrix);
             }
             naiveGreedyTimes[iteration] = System.nanoTime() - startTime;
 
@@ -86,7 +91,8 @@ public class Main extends Application {
             randomGreedyResults[iteration] = randomGreedyLocalSolver.getPenalties();
             if (randomGreedyLocalSolver.getPenalties() < bestRandomGreedyResult) {
                 bestRandomGreedyResult = randomGreedyLocalSolver.getPenalties();
-                bestRandomGreedyGroups = castLocalSearchToGraph(randomGreedyLocalSolver.getGroups(), distanceMatrix);
+                bestRandomGreedyGroupsMST = castLocalSearchToMSTGraph(randomGreedyLocalSolver.getGroups(), distanceMatrix);
+                bestRandomGreedyGroupsConnections = castLocalSearchToConnectionGraph(randomGreedyLocalSolver.getGroups(), distanceMatrix);
             }
             randomGreedyTimes[iteration] = System.nanoTime() - startTime;
 
@@ -99,7 +105,8 @@ public class Main extends Application {
             naiveSteepestResults[iteration] = naiveSteepestLocalSolver.getPenalties();
             if (naiveSteepestLocalSolver.getPenalties() < bestNaiveSteepestResult) {
                 bestNaiveSteepestResult = naiveSteepestLocalSolver.getPenalties();
-                bestNaiveSteepestGroups = castLocalSearchToGraph(naiveSteepestLocalSolver.getGroups(), distanceMatrix);
+                bestNaiveSteepestGroupsMST = castLocalSearchToMSTGraph(naiveSteepestLocalSolver.getGroups(), distanceMatrix);
+                bestNaiveSteepestGroupsConnections = castLocalSearchToConnectionGraph(naiveSteepestLocalSolver.getGroups(), distanceMatrix);
             }
             naiveSteepestTimes[iteration] = System.nanoTime() - startTime;
 
@@ -112,16 +119,28 @@ public class Main extends Application {
             randomSteepestResults[iteration] = randomSteepestLocalSolver.getPenalties();
             if (randomSteepestLocalSolver.getPenalties() < bestRandomSteepestResult) {
                 bestRandomSteepestResult = randomSteepestLocalSolver.getPenalties();
-                bestRandomSteepestGroups = castLocalSearchToGraph(randomSteepestLocalSolver.getGroups(), distanceMatrix);
+                bestRandomSteepestGroupsMST = castLocalSearchToMSTGraph(randomSteepestLocalSolver.getGroups(), distanceMatrix);
+                bestRandomSteepestGroupsConnections = castLocalSearchToConnectionGraph(randomSteepestLocalSolver.getGroups(), distanceMatrix);
             }
             randomSteepestTimes[iteration] = System.nanoTime() - startTime;
         }
 
         // Show groups on graph
-        new Drawer().drawInputInstance(coordinates, bestNaiveGreedyGroups, "Naive greedy");
-        new Drawer().drawInputInstance(coordinates, bestRandomGreedyGroups, "Random greedy");
-        new Drawer().drawInputInstance(coordinates, bestRandomSteepestGroups, "Random steepest");
-        new Drawer().drawInputInstance(coordinates, bestNaiveSteepestGroups, "Naive steepest");
+        new Drawer().drawInputInstance(coordinates, bestNaiveGreedyGroupsMST, "Naive greedy", true, true);
+        new Drawer().drawInputInstance(coordinates, bestNaiveGreedyGroupsMST, "Naive greedy", true, false);
+        new Drawer().drawInputInstance(coordinates, bestNaiveGreedyGroupsConnections, "Naive greedy", false, true);
+
+        new Drawer().drawInputInstance(coordinates, bestRandomGreedyGroupsMST, "Random greedy", true, true);
+        new Drawer().drawInputInstance(coordinates, bestRandomGreedyGroupsMST, "Random greedy", true, false);
+        new Drawer().drawInputInstance(coordinates, bestRandomGreedyGroupsConnections, "Random greedy", false, true);
+
+        new Drawer().drawInputInstance(coordinates, bestNaiveSteepestGroupsMST, "Naive steepest", true, true);
+        new Drawer().drawInputInstance(coordinates, bestNaiveSteepestGroupsMST, "Naive steepest", true, false);
+        new Drawer().drawInputInstance(coordinates, bestNaiveSteepestGroupsConnections, "Naive steepest", false, true);
+
+        new Drawer().drawInputInstance(coordinates, bestRandomSteepestGroupsMST, "Random steepest", true, true);
+        new Drawer().drawInputInstance(coordinates, bestRandomSteepestGroupsMST, "Random steepest", true, false);
+        new Drawer().drawInputInstance(coordinates, bestRandomSteepestGroupsConnections, "Random steepest", false, true);
 
         if (SHOW_STATISTICS) {
             System.out.println("Min result for naive greedy = " + bestNaiveGreedyResult);
@@ -164,13 +183,44 @@ public class Main extends Application {
      * @param distanceMatrix   Distance matrix
      * @return Connections on graph (paths)
      */
-    private HashSet<ArrayList<PointsPath>> castLocalSearchToGraph(HashMap<Integer, HashSet<Integer>> algorithmResults, double[][] distanceMatrix) {
+    private HashSet<ArrayList<PointsPath>> castLocalSearchToMSTGraph(HashMap<Integer, HashSet<Integer>> algorithmResults, double[][] distanceMatrix) {
         HashSet<ArrayList<PointsPath>> groupsWithPaths = new HashSet<>();
         PrimSolver solver = new PrimSolver();
 
         for (Map.Entry<Integer, HashSet<Integer>> res : algorithmResults.entrySet()) {
             solver.construct(res.getValue().stream().mapToInt(Integer::intValue).toArray(), distanceMatrix);
             groupsWithPaths.add(solver.getPath());
+        }
+
+        return groupsWithPaths;
+    }
+
+    /**
+     * Change assignment to connection on graph
+     *
+     * @param algorithmResults Assignment to group
+     * @param distanceMatrix   Distance matrix
+     * @return Connections on graph (paths)
+     */
+    private HashSet<ArrayList<PointsPath>> castLocalSearchToConnectionGraph(HashMap<Integer, HashSet<Integer>> algorithmResults, double[][] distanceMatrix) {
+        HashSet<ArrayList<PointsPath>> groupsWithPaths = new HashSet<>();
+
+        for (Map.Entry<Integer, HashSet<Integer>> entry : algorithmResults.entrySet()) {
+            ArrayList<PointsPath> path = new ArrayList<>();
+            int len = entry.getValue().size();
+            int ind_i, ind_j;
+            int[] indexes = entry.getValue().stream().mapToInt(Integer::intValue).toArray();
+
+            for (int i = 0; i < len; i++) {
+                ind_i = indexes[i];
+
+                for (int j = i + 1; j < len; j++) {
+                    ind_j = indexes[j];
+                    path.add(new PointsPath(ind_i, ind_j, distanceMatrix[ind_i][ind_j]));
+                }
+            }
+
+            groupsWithPaths.add(path);
         }
 
         return groupsWithPaths;
