@@ -5,22 +5,10 @@ import java.util.Collections;
 import java.util.HashSet;
 
 public class PrimSolver {
-    private double penalties;
-    private double meanOfDistances;
-    private ArrayList<PointsPath> path;
-
     /**
-     * Get penalties sum - total distance
-     *
-     * @return Penalties value - sum of distances in graph
+     * Path as list of points
      */
-    public double getPenalties() {
-        return penalties;
-    }
-
-    public double getMeanOfDistances() {
-        return meanOfDistances;
-    }
+    private ArrayList<PointsPath> path;
 
     /**
      * Get prepared MST as list of points
@@ -85,19 +73,6 @@ public class PrimSolver {
                     break;
                 }
             }
-        }
-
-        // Calculate penalties
-        this.calculatePenalties();
-    }
-
-    /**
-     * Calculate sum of penalties and store it in object's state
-     */
-    public void calculatePenalties() {
-        this.penalties = 0.0;
-        for (PointsPath point : this.path) {
-            this.penalties += point.getPenalties();
         }
     }
 }

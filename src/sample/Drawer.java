@@ -14,6 +14,9 @@ import java.util.ArrayList;
 import java.util.HashSet;
 
 public class Drawer {
+    /**
+     * Custom colors - different and easy to check on graph
+     */
     private Color[] colors = {
             Color.RED,
             Color.AQUA,
