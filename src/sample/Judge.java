@@ -15,11 +15,11 @@ public class Judge {
     /**
      * Sum of changes in connections. Can be negative and positive value.
      */
-    private int changedArcs;
+    private int changedArcs = 0;
     /**
      * Sum of changed (amount) distance
      */
-    private double changedDistance;
+    private double changedDistance = 0.0;
 
     /**
      * Calculate mean distance in connections. Sum of distances / total arcs
@@ -89,6 +89,9 @@ public class Judge {
         this.sumOfDistances += this.changedDistance;
         this.totalArcs += this.changedArcs;
 
+        this.changedArcs = 0;
+        this.changedDistance = 0.0;
+
         return this.sumOfDistances / (this.totalArcs > 0 ? this.totalArcs : 1);
     }
 
@@ -98,5 +101,13 @@ public class Judge {
     public double tempMeanDistance() {
         int arcs = this.totalArcs + this.changedArcs;
         return (this.sumOfDistances + this.changedDistance) / (arcs > 0 ? arcs : 1);
+    }
+
+    public int getArcs() {
+        return this.totalArcs + this.changedArcs;
+    }
+
+    public double getSumOfDistances() {
+        return this.sumOfDistances + this.changedDistance;
     }
 }

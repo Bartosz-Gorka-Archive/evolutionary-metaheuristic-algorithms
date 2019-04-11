@@ -13,7 +13,7 @@ public class Main extends Application {
     /**
      * Number of iterations in test stage
      */
-    private final static int TESTS_NUMBER = 100;
+    private final static int TESTS_NUMBER = 1;
     /**
      * Should we show extra logs and statistics?
      */

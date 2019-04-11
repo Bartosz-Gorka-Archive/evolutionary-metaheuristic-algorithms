@@ -1,9 +1,6 @@
 package sample;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
+import java.util.*;
 
 public class SteepestLocalSolver {
     /**
@@ -45,8 +42,15 @@ public class SteepestLocalSolver {
         Judge judge = new Judge();
         this.penalties = judge.calcMeanDistance(this.groups, distanceMatrix);
         int totalElements = distanceMatrix.length;
+        int totalArcs = judge.getArcs();
+        double totalDistance = judge.getSumOfDistances();
+
+        // Cache - start with empty
+        HashSet<MoveBetweenClass> cache = new HashSet<>();
+        int iter = 0;
 
         while (penaltiesChanged) {
+            iter++;
             double bestPenalties = this.penalties;
             int[] bestMove = {-1, -1, -1};
             penaltiesChanged = false;
@@ -112,14 +116,21 @@ public class SteepestLocalSolver {
 
             // Check moves
             for (int[] move : moves) {
-                judge.calculateChangedDistance(this.groups, move, distanceMatrix);
+                MoveBetweenClass m = new MoveBetweenClass(move[0], move[1], move[2]);
+                if (!cache.contains(m)) {
+                    judge.calculateChangedDistance(this.groups, move, distanceMatrix);
+                    m.setArcs(judge.getArcs());
+                    m.setSumOfDistances(judge.getSumOfDistances());
+                    cache.add(m);
+                }
 
                 // Verify move
-                if (judge.tempMeanDistance() < bestPenalties) {
-                    bestPenalties = judge.tempMeanDistance();
-                    bestMove[0] = move[0];
-                    bestMove[1] = move[1];
-                    bestMove[2] = move[2];
+                MoveBetweenClass element = cache.stream().filter(potentialMove -> potentialMove.equals(m)).findFirst().get();
+                if (element.getPenalties() < bestPenalties) {
+                    bestPenalties = element.getPenalties();
+                    bestMove[0] = m.getPointID();
+                    bestMove[1] = m.getStartClassID();
+                    bestMove[2] = m.getTargetClassID();
                 }
             }
 
@@ -133,8 +144,29 @@ public class SteepestLocalSolver {
                 judge.calculateChangedDistance(this.groups, bestMove, distanceMatrix);
                 this.penalties = judge.updateDistance();
 
+                // Calculate changes
+                int changedArcs = totalArcs - judge.getArcs();
+                double changedDistance = totalDistance - judge.getSumOfDistances();
+
+                totalArcs = judge.getArcs();
+                totalDistance = judge.getSumOfDistances();
+
                 // Enable next iteration
                 penaltiesChanged = true;
+
+                // Remove changed groups from cache
+                for (Iterator<MoveBetweenClass> i = cache.iterator(); i.hasNext(); ) {
+                    MoveBetweenClass m = i.next();
+                    if (m.getTargetClassID() == bestMove[2] || m.getStartClassID() == bestMove[1]) {
+                        i.remove();
+                    } else {
+                        m.updateData(changedArcs, changedDistance);
+                    }
+                }
+
+                if (iter % 5 == 0) {
+                    cache.clear();
+                }
             }
         }
     }
