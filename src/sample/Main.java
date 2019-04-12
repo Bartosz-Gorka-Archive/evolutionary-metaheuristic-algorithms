@@ -18,6 +18,19 @@ public class Main extends Application {
      * Should we show extra logs and statistics?
      */
     private final static boolean SHOW_STATISTICS = true;
+    /**
+     * Should we use following algorithms?
+     */
+    private final static boolean EXECUTE_GREEDY_NAIVE = false;
+    private final static boolean EXECUTE_GREEDY_RANDOM = false;
+    private final static boolean EXECUTE_STEEPEST_NAIVE = true;
+    private final static boolean EXECUTE_STEEPEST_RANDOM = false;
+    private final static boolean EXECUTE_STEEPEST_CANDIDATE = true;
+
+    /**
+     * How many candidates we chose in steepest naive candidates algorithm
+     */
+    private final static int CANDIDATES_NUMBER = 10;
 
     public static void main(String[] args) {
         launch(args);
@@ -39,13 +52,22 @@ public class Main extends Application {
         HashSet<ArrayList<PointsPath>> bestRandomGreedyGroupsConnections = new HashSet<>();
         HashSet<ArrayList<PointsPath>> bestRandomSteepestGroupsMST = new HashSet<>();
         HashSet<ArrayList<PointsPath>> bestRandomSteepestGroupsConnections = new HashSet<>();
+        HashSet<ArrayList<PointsPath>> bestNaiveSteepestCandidateGroupsMST = new HashSet<>();
+        HashSet<ArrayList<PointsPath>> bestNaiveSteepestCandidateGroupsConnections = new HashSet<>();
 
         double[] naiveGreedyResults = new double[TESTS_NUMBER], naiveSteepestResults = new double[TESTS_NUMBER],
                 randomGreedyResults = new double[TESTS_NUMBER], randomSteepestResults = new double[TESTS_NUMBER],
+                naiveSteepestCandidateResults = new double[TESTS_NUMBER],
                 naiveGreedyTimes = new double[TESTS_NUMBER], naiveSteepestTimes = new double[TESTS_NUMBER],
-                randomGreedyTimes = new double[TESTS_NUMBER], randomSteepestTimes = new double[TESTS_NUMBER];
+                randomGreedyTimes = new double[TESTS_NUMBER], randomSteepestTimes = new double[TESTS_NUMBER],
+                naiveSteepestCandidateTimes = new double[TESTS_NUMBER];
+
         double bestNaiveGreedyResult = Double.MAX_VALUE, bestRandomGreedyResult = Double.MAX_VALUE,
-                bestNaiveSteepestResult = Double.MAX_VALUE, bestRandomSteepestResult = Double.MAX_VALUE;
+                bestNaiveSteepestResult = Double.MAX_VALUE, bestRandomSteepestResult = Double.MAX_VALUE,
+                bestNaiveSteepestCandidateResult = Double.MAX_VALUE;
+
+        //using for statistics
+        long startTime;
 
         // Iterations
         for (int iteration = 0; iteration < TESTS_NUMBER; iteration++) {
@@ -71,58 +93,75 @@ public class Main extends Application {
             /*
              * GREEDY NAIVE
              */
-            long startTime = System.nanoTime();
-            GreedyLocalSolver naiveGreedyLocalSolver = new GreedyLocalSolver(naiveInstances);
-            naiveGreedyLocalSolver.run(distanceMatrix);
-            naiveGreedyResults[iteration] = naiveGreedyLocalSolver.getPenalties();
-            if (naiveGreedyLocalSolver.getPenalties() < bestNaiveGreedyResult) {
-                bestNaiveGreedyResult = naiveGreedyLocalSolver.getPenalties();
-                bestNaiveGreedyGroupsMST = castLocalSearchToMSTGraph(naiveGreedyLocalSolver.getGroups(), distanceMatrix);
-                bestNaiveGreedyGroupsConnections = castLocalSearchToConnectionGraph(naiveGreedyLocalSolver.getGroups(), distanceMatrix);
+            if (EXECUTE_GREEDY_NAIVE) {
+                startTime = System.nanoTime();
+                GreedyLocalSolver naiveGreedyLocalSolver = new GreedyLocalSolver(naiveInstances);
+                naiveGreedyLocalSolver.run(distanceMatrix);
+                naiveGreedyResults[iteration] = naiveGreedyLocalSolver.getPenalties();
+                if (naiveGreedyLocalSolver.getPenalties() < bestNaiveGreedyResult) {
+                    bestNaiveGreedyResult = naiveGreedyLocalSolver.getPenalties();
+                    bestNaiveGreedyGroupsMST = castLocalSearchToMSTGraph(naiveGreedyLocalSolver.getGroups(), distanceMatrix);
+                    bestNaiveGreedyGroupsConnections = castLocalSearchToConnectionGraph(naiveGreedyLocalSolver.getGroups(), distanceMatrix);
+                }
+                naiveGreedyTimes[iteration] = System.nanoTime() - startTime;
             }
-            naiveGreedyTimes[iteration] = System.nanoTime() - startTime;
-
             /*
              * GREEDY RANDOM
              */
-            startTime = System.nanoTime();
-            GreedyLocalSolver randomGreedyLocalSolver = new GreedyLocalSolver(randomInstances);
-            randomGreedyLocalSolver.run(distanceMatrix);
-            randomGreedyResults[iteration] = randomGreedyLocalSolver.getPenalties();
-            if (randomGreedyLocalSolver.getPenalties() < bestRandomGreedyResult) {
-                bestRandomGreedyResult = randomGreedyLocalSolver.getPenalties();
-                bestRandomGreedyGroupsMST = castLocalSearchToMSTGraph(randomGreedyLocalSolver.getGroups(), distanceMatrix);
-                bestRandomGreedyGroupsConnections = castLocalSearchToConnectionGraph(randomGreedyLocalSolver.getGroups(), distanceMatrix);
+            if (EXECUTE_GREEDY_RANDOM) {
+                startTime = System.nanoTime();
+                GreedyLocalSolver randomGreedyLocalSolver = new GreedyLocalSolver(randomInstances);
+                randomGreedyLocalSolver.run(distanceMatrix);
+                randomGreedyResults[iteration] = randomGreedyLocalSolver.getPenalties();
+                if (randomGreedyLocalSolver.getPenalties() < bestRandomGreedyResult) {
+                    bestRandomGreedyResult = randomGreedyLocalSolver.getPenalties();
+                    bestRandomGreedyGroupsMST = castLocalSearchToMSTGraph(randomGreedyLocalSolver.getGroups(), distanceMatrix);
+                    bestRandomGreedyGroupsConnections = castLocalSearchToConnectionGraph(randomGreedyLocalSolver.getGroups(), distanceMatrix);
+                }
+                randomGreedyTimes[iteration] = System.nanoTime() - startTime;
             }
-            randomGreedyTimes[iteration] = System.nanoTime() - startTime;
-
             /*
              * STEEPEST NAIVE
              */
-            startTime = System.nanoTime();
-            SteepestLocalSolver naiveSteepestLocalSolver = new SteepestLocalSolver(naiveInstances);
-            naiveSteepestLocalSolver.run(distanceMatrix);
-            naiveSteepestResults[iteration] = naiveSteepestLocalSolver.getPenalties();
-            if (naiveSteepestLocalSolver.getPenalties() < bestNaiveSteepestResult) {
-                bestNaiveSteepestResult = naiveSteepestLocalSolver.getPenalties();
-                bestNaiveSteepestGroupsMST = castLocalSearchToMSTGraph(naiveSteepestLocalSolver.getGroups(), distanceMatrix);
-                bestNaiveSteepestGroupsConnections = castLocalSearchToConnectionGraph(naiveSteepestLocalSolver.getGroups(), distanceMatrix);
+            if (EXECUTE_STEEPEST_NAIVE) {
+                startTime = System.nanoTime();
+                SteepestLocalSolver naiveSteepestLocalSolver = new SteepestLocalSolver(naiveInstances, false, CANDIDATES_NUMBER);
+                naiveSteepestLocalSolver.run(distanceMatrix);
+                naiveSteepestResults[iteration] = naiveSteepestLocalSolver.getPenalties();
+                if (naiveSteepestLocalSolver.getPenalties() < bestNaiveSteepestResult) {
+                    bestNaiveSteepestResult = naiveSteepestLocalSolver.getPenalties();
+                    bestNaiveSteepestGroupsMST = castLocalSearchToMSTGraph(naiveSteepestLocalSolver.getGroups(), distanceMatrix);
+                    bestNaiveSteepestGroupsConnections = castLocalSearchToConnectionGraph(naiveSteepestLocalSolver.getGroups(), distanceMatrix);
+                }
+                naiveSteepestTimes[iteration] = System.nanoTime() - startTime;
             }
-            naiveSteepestTimes[iteration] = System.nanoTime() - startTime;
-
             /*
              * STEEPEST RANDOM
              */
-            startTime = System.nanoTime();
-            SteepestLocalSolver randomSteepestLocalSolver = new SteepestLocalSolver(randomInstances);
-            randomSteepestLocalSolver.run(distanceMatrix);
-            randomSteepestResults[iteration] = randomSteepestLocalSolver.getPenalties();
-            if (randomSteepestLocalSolver.getPenalties() < bestRandomSteepestResult) {
-                bestRandomSteepestResult = randomSteepestLocalSolver.getPenalties();
-                bestRandomSteepestGroupsMST = castLocalSearchToMSTGraph(randomSteepestLocalSolver.getGroups(), distanceMatrix);
-                bestRandomSteepestGroupsConnections = castLocalSearchToConnectionGraph(randomSteepestLocalSolver.getGroups(), distanceMatrix);
+            if (EXECUTE_STEEPEST_RANDOM) {
+                startTime = System.nanoTime();
+                SteepestLocalSolver randomSteepestLocalSolver = new SteepestLocalSolver(randomInstances, false, CANDIDATES_NUMBER);
+                randomSteepestLocalSolver.run(distanceMatrix);
+                randomSteepestResults[iteration] = randomSteepestLocalSolver.getPenalties();
+                if (randomSteepestLocalSolver.getPenalties() < bestRandomSteepestResult) {
+                    bestRandomSteepestResult = randomSteepestLocalSolver.getPenalties();
+                    bestRandomSteepestGroupsMST = castLocalSearchToMSTGraph(randomSteepestLocalSolver.getGroups(), distanceMatrix);
+                    bestRandomSteepestGroupsConnections = castLocalSearchToConnectionGraph(randomSteepestLocalSolver.getGroups(), distanceMatrix);
+                }
+                randomSteepestTimes[iteration] = System.nanoTime() - startTime;
             }
-            randomSteepestTimes[iteration] = System.nanoTime() - startTime;
+            if (EXECUTE_STEEPEST_CANDIDATE) {
+                startTime = System.nanoTime();
+                SteepestLocalSolver naiveSteepestLocalSolver = new SteepestLocalSolver(naiveInstances, true, CANDIDATES_NUMBER);
+                naiveSteepestLocalSolver.run(distanceMatrix);
+                naiveSteepestCandidateResults[iteration] = naiveSteepestLocalSolver.getPenalties();
+                if (naiveSteepestLocalSolver.getPenalties() < bestNaiveSteepestCandidateResult) {
+                    bestNaiveSteepestCandidateResult = naiveSteepestLocalSolver.getPenalties();
+                    bestNaiveSteepestCandidateGroupsMST = castLocalSearchToMSTGraph(naiveSteepestLocalSolver.getGroups(), distanceMatrix);
+                    bestNaiveSteepestCandidateGroupsConnections = castLocalSearchToConnectionGraph(naiveSteepestLocalSolver.getGroups(), distanceMatrix);
+                }
+                naiveSteepestCandidateTimes[iteration] = System.nanoTime() - startTime;
+            }
         }
 
         // Show groups on graph
@@ -142,37 +181,48 @@ public class Main extends Application {
         new Drawer().drawInputInstance(coordinates, bestRandomSteepestGroupsMST, "Random steepest", true, false);
         new Drawer().drawInputInstance(coordinates, bestRandomSteepestGroupsConnections, "Random steepest", false, true);
 
+        new Drawer().drawInputInstance(coordinates, bestNaiveSteepestCandidateGroupsMST, "Naive steepest candidate", true, true);
+        new Drawer().drawInputInstance(coordinates, bestNaiveSteepestCandidateGroupsMST, "Naive steepest  candidate", true, false);
+        new Drawer().drawInputInstance(coordinates, bestNaiveSteepestCandidateGroupsConnections, "Naive steepest candidate", false, true);
+
         if (SHOW_STATISTICS) {
             System.out.println("Min result for naive greedy = " + bestNaiveGreedyResult);
             System.out.println("Min result for random greedy = " + bestRandomGreedyResult);
             System.out.println("Min result for naive steepest = " + bestNaiveSteepestResult);
             System.out.println("Min result for random steepest = " + bestRandomSteepestResult);
+            System.out.println("Min result for naive steepest candidate = " + bestNaiveSteepestCandidateResult);
 
             System.out.println("Mean result for naive greedy = " + Arrays.stream(naiveGreedyResults).average().getAsDouble());
             System.out.println("Mean result for random greedy = " + Arrays.stream(randomGreedyResults).average().getAsDouble());
             System.out.println("Mean result for naive steepest = " + Arrays.stream(naiveSteepestResults).average().getAsDouble());
             System.out.println("Mean result for random steepest = " + Arrays.stream(randomSteepestResults).average().getAsDouble());
+            System.out.println("Mean result for naive steepest candidate = " + Arrays.stream(naiveSteepestCandidateResults).average().getAsDouble());
 
             System.out.println("Max result for naive greedy = " + Arrays.stream(naiveGreedyResults).max().getAsDouble());
             System.out.println("Max result for random greedy = " + Arrays.stream(randomGreedyResults).max().getAsDouble());
             System.out.println("Max result for naive steepest = " + Arrays.stream(naiveSteepestResults).max().getAsDouble());
             System.out.println("Max result for random steepest = " + Arrays.stream(randomSteepestResults).max().getAsDouble());
+            System.out.println("Max result for naive steepest candidate = " + Arrays.stream(naiveSteepestCandidateResults).max().getAsDouble());
 
             System.out.println("TIMING:");
             System.out.println("Min time for naive greedy = " + Arrays.stream(naiveGreedyTimes).min().getAsDouble());
             System.out.println("Min time for random greedy = " + Arrays.stream(randomGreedyTimes).min().getAsDouble());
             System.out.println("Min time for naive steepest = " + Arrays.stream(naiveSteepestTimes).min().getAsDouble());
             System.out.println("Min time for random steepest = " + Arrays.stream(randomSteepestTimes).min().getAsDouble());
+            System.out.println("Min time for naive steepest candidate = " + Arrays.stream(naiveSteepestCandidateTimes).min().getAsDouble());
 
             System.out.println("Mean time for naive greedy = " + Arrays.stream(naiveGreedyTimes).average().getAsDouble());
             System.out.println("Mean time for random greedy = " + Arrays.stream(randomGreedyTimes).average().getAsDouble());
             System.out.println("Mean time for naive steepest = " + Arrays.stream(naiveSteepestTimes).average().getAsDouble());
             System.out.println("Mean time for random steepest = " + Arrays.stream(randomSteepestTimes).average().getAsDouble());
+            System.out.println("Mean time for naive steepest candidate = " + Arrays.stream(naiveSteepestCandidateTimes).average().getAsDouble());
 
             System.out.println("Max time for naive greedy = " + Arrays.stream(naiveGreedyTimes).max().getAsDouble());
             System.out.println("Max time for random greedy = " + Arrays.stream(randomGreedyTimes).max().getAsDouble());
             System.out.println("Max time for naive steepest = " + Arrays.stream(naiveSteepestTimes).max().getAsDouble());
             System.out.println("Max time for random steepest = " + Arrays.stream(randomSteepestTimes).max().getAsDouble());
+            System.out.println("Max time for naive steepest candidate = " + Arrays.stream(naiveSteepestCandidateTimes).max().getAsDouble());
+
         }
     }
 
