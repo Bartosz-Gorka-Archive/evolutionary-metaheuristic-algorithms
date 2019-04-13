@@ -26,6 +26,8 @@ public class Main extends Application {
     private final static boolean EXECUTE_STEEPEST_NAIVE = true;
     private final static boolean EXECUTE_STEEPEST_RANDOM = false;
     private final static boolean EXECUTE_STEEPEST_CANDIDATE = true;
+    private final static boolean EXECUTE_STEEPEST_CANDIDATE_CACHE = true;
+    private final static boolean EXECUTE_STEEPEST_CACHE = true;
     /**
      * How many candidates we chose in steepest naive candidates algorithm
      */
@@ -52,18 +54,25 @@ public class Main extends Application {
         HashSet<ArrayList<PointsPath>> bestRandomSteepestGroupsMST = new HashSet<>();
         HashSet<ArrayList<PointsPath>> bestRandomSteepestGroupsConnections = new HashSet<>();
         HashSet<ArrayList<PointsPath>> bestNaiveSteepestCandidateGroupsMST = new HashSet<>();
+        HashSet<ArrayList<PointsPath>> bestNaiveSteepestCacheGroupsMST = new HashSet<>();
+        HashSet<ArrayList<PointsPath>> bestNaiveSteepestCandidateCacheGroupsMST = new HashSet<>();
         HashSet<ArrayList<PointsPath>> bestNaiveSteepestCandidateGroupsConnections = new HashSet<>();
+        HashSet<ArrayList<PointsPath>> bestNaiveSteepestCacheGroupsConnections = new HashSet<>();
+        HashSet<ArrayList<PointsPath>> bestNaiveSteepestCandidateCacheGroupsConnections = new HashSet<>();
 
         double[] naiveGreedyResults = new double[TESTS_NUMBER], naiveSteepestResults = new double[TESTS_NUMBER],
                 randomGreedyResults = new double[TESTS_NUMBER], randomSteepestResults = new double[TESTS_NUMBER],
-                naiveSteepestCandidateResults = new double[TESTS_NUMBER],
+                naiveSteepestCandidateResults = new double[TESTS_NUMBER], naiveSteepestCacheResults = new double[TESTS_NUMBER],
+                naiveSteepestCandidateCacheResults = new double[TESTS_NUMBER],
                 naiveGreedyTimes = new double[TESTS_NUMBER], naiveSteepestTimes = new double[TESTS_NUMBER],
                 randomGreedyTimes = new double[TESTS_NUMBER], randomSteepestTimes = new double[TESTS_NUMBER],
-                naiveSteepestCandidateTimes = new double[TESTS_NUMBER];
+                naiveSteepestCandidateTimes = new double[TESTS_NUMBER], naiveSteepestCacheTimes = new double[TESTS_NUMBER],
+                naiveSteepestCandidateCacheTimes = new double[TESTS_NUMBER];
 
         double bestNaiveGreedyResult = Double.MAX_VALUE, bestRandomGreedyResult = Double.MAX_VALUE,
                 bestNaiveSteepestResult = Double.MAX_VALUE, bestRandomSteepestResult = Double.MAX_VALUE,
-                bestNaiveSteepestCandidateResult = Double.MAX_VALUE;
+                bestNaiveSteepestCandidateResult = Double.MAX_VALUE, bestNaiveSteepestCacheResult = Double.MAX_VALUE,
+                bestNaiveSteepestCandidateCacheResult = Double.MAX_VALUE;
 
         // Using for statistics
         long startTime;
@@ -124,7 +133,7 @@ public class Main extends Application {
              */
             if (EXECUTE_STEEPEST_NAIVE) {
                 startTime = System.nanoTime();
-                SteepestLocalSolver naiveSteepestLocalSolver = new SteepestLocalSolver(naiveInstances, false, CANDIDATES_NUMBER);
+                SteepestLocalSolver naiveSteepestLocalSolver = new SteepestLocalSolver(naiveInstances, false, CANDIDATES_NUMBER, false);
                 naiveSteepestLocalSolver.run(distanceMatrix);
                 naiveSteepestResults[iteration] = naiveSteepestLocalSolver.getPenalties();
                 if (naiveSteepestLocalSolver.getPenalties() < bestNaiveSteepestResult) {
@@ -139,7 +148,7 @@ public class Main extends Application {
              */
             if (EXECUTE_STEEPEST_RANDOM) {
                 startTime = System.nanoTime();
-                SteepestLocalSolver randomSteepestLocalSolver = new SteepestLocalSolver(randomInstances, false, CANDIDATES_NUMBER);
+                SteepestLocalSolver randomSteepestLocalSolver = new SteepestLocalSolver(randomInstances, false, CANDIDATES_NUMBER, false);
                 randomSteepestLocalSolver.run(distanceMatrix);
                 randomSteepestResults[iteration] = randomSteepestLocalSolver.getPenalties();
                 if (randomSteepestLocalSolver.getPenalties() < bestRandomSteepestResult) {
@@ -151,7 +160,7 @@ public class Main extends Application {
             }
             if (EXECUTE_STEEPEST_CANDIDATE) {
                 startTime = System.nanoTime();
-                SteepestLocalSolver naiveSteepestLocalSolver = new SteepestLocalSolver(naiveInstances, true, CANDIDATES_NUMBER);
+                SteepestLocalSolver naiveSteepestLocalSolver = new SteepestLocalSolver(naiveInstances, true, CANDIDATES_NUMBER, false);
                 naiveSteepestLocalSolver.run(distanceMatrix);
                 naiveSteepestCandidateResults[iteration] = naiveSteepestLocalSolver.getPenalties();
                 if (naiveSteepestLocalSolver.getPenalties() < bestNaiveSteepestCandidateResult) {
@@ -160,6 +169,30 @@ public class Main extends Application {
                     bestNaiveSteepestCandidateGroupsConnections = castLocalSearchToConnectionGraph(naiveSteepestLocalSolver.getGroups(), distanceMatrix);
                 }
                 naiveSteepestCandidateTimes[iteration] = System.nanoTime() - startTime;
+            }
+            if (EXECUTE_STEEPEST_CACHE) {
+                startTime = System.nanoTime();
+                SteepestLocalSolver naiveSteepestLocalSolver = new SteepestLocalSolver(naiveInstances, false, CANDIDATES_NUMBER, true);
+                naiveSteepestLocalSolver.run(distanceMatrix);
+                naiveSteepestCacheResults[iteration] = naiveSteepestLocalSolver.getPenalties();
+                if (naiveSteepestLocalSolver.getPenalties() < bestNaiveSteepestCacheResult) {
+                    bestNaiveSteepestCacheResult = naiveSteepestLocalSolver.getPenalties();
+                    bestNaiveSteepestCacheGroupsMST = castLocalSearchToMSTGraph(naiveSteepestLocalSolver.getGroups(), distanceMatrix);
+                    bestNaiveSteepestCacheGroupsConnections = castLocalSearchToConnectionGraph(naiveSteepestLocalSolver.getGroups(), distanceMatrix);
+                }
+                naiveSteepestCacheTimes[iteration] = System.nanoTime() - startTime;
+            }
+            if (EXECUTE_STEEPEST_CANDIDATE_CACHE) {
+                startTime = System.nanoTime();
+                SteepestLocalSolver naiveSteepestLocalSolver = new SteepestLocalSolver(naiveInstances, true, CANDIDATES_NUMBER, true);
+                naiveSteepestLocalSolver.run(distanceMatrix);
+                naiveSteepestCandidateCacheResults[iteration] = naiveSteepestLocalSolver.getPenalties();
+                if (naiveSteepestLocalSolver.getPenalties() < bestNaiveSteepestCandidateCacheResult) {
+                    bestNaiveSteepestCandidateCacheResult = naiveSteepestLocalSolver.getPenalties();
+                    bestNaiveSteepestCandidateCacheGroupsMST = castLocalSearchToMSTGraph(naiveSteepestLocalSolver.getGroups(), distanceMatrix);
+                    bestNaiveSteepestCandidateCacheGroupsConnections = castLocalSearchToConnectionGraph(naiveSteepestLocalSolver.getGroups(), distanceMatrix);
+                }
+                naiveSteepestCandidateCacheTimes[iteration] = System.nanoTime() - startTime;
             }
         }
 
@@ -194,6 +227,18 @@ public class Main extends Application {
             new Drawer().drawInputInstance(coordinates, bestNaiveSteepestCandidateGroupsConnections, "Naive steepest candidate", false, true);
         }
 
+        if (EXECUTE_STEEPEST_CACHE) {
+            new Drawer().drawInputInstance(coordinates, bestNaiveSteepestCacheGroupsMST, "Naive steepest cache", true, true);
+            new Drawer().drawInputInstance(coordinates, bestNaiveSteepestCacheGroupsMST, "Naive steepest cache", true, false);
+            new Drawer().drawInputInstance(coordinates, bestNaiveSteepestCacheGroupsConnections, "Naive steepest cache", false, true);
+        }
+
+        if (EXECUTE_STEEPEST_CANDIDATE_CACHE) {
+            new Drawer().drawInputInstance(coordinates, bestNaiveSteepestCandidateCacheGroupsMST, "Naive steepest candidate + cache", true, true);
+            new Drawer().drawInputInstance(coordinates, bestNaiveSteepestCandidateCacheGroupsMST, "Naive steepest candidate + cache", true, false);
+            new Drawer().drawInputInstance(coordinates, bestNaiveSteepestCandidateCacheGroupsConnections, "Naive steepest candidate + cache", false, true);
+        }
+
         if (SHOW_STATISTICS) {
             if (EXECUTE_GREEDY_NAIVE)
                 System.out.println("Min result for naive greedy = " + bestNaiveGreedyResult);
@@ -205,6 +250,10 @@ public class Main extends Application {
                 System.out.println("Min result for random steepest = " + bestRandomSteepestResult);
             if (EXECUTE_STEEPEST_CANDIDATE)
                 System.out.println("Min result for naive steepest candidate = " + bestNaiveSteepestCandidateResult);
+            if (EXECUTE_STEEPEST_CACHE)
+                System.out.println("Min result for naive steepest cache = " + bestNaiveSteepestCacheResult);
+            if (EXECUTE_STEEPEST_CANDIDATE_CACHE)
+                System.out.println("Min result for naive steepest candidate + cache = " + bestNaiveSteepestCandidateCacheResult);
 
             if (EXECUTE_GREEDY_NAIVE)
                 System.out.println("Mean result for naive greedy = " + Arrays.stream(naiveGreedyResults).average().getAsDouble());
@@ -216,6 +265,10 @@ public class Main extends Application {
                 System.out.println("Mean result for random steepest = " + Arrays.stream(randomSteepestResults).average().getAsDouble());
             if (EXECUTE_STEEPEST_CANDIDATE)
                 System.out.println("Mean result for naive steepest candidate = " + Arrays.stream(naiveSteepestCandidateResults).average().getAsDouble());
+            if (EXECUTE_STEEPEST_CACHE)
+                System.out.println("Mean result for naive steepest cache = " + Arrays.stream(naiveSteepestCacheResults).average().getAsDouble());
+            if (EXECUTE_STEEPEST_CANDIDATE_CACHE)
+                System.out.println("Mean result for naive steepest candidate + cache = " + Arrays.stream(naiveSteepestCandidateCacheResults).average().getAsDouble());
 
             if (EXECUTE_GREEDY_NAIVE)
                 System.out.println("Max result for naive greedy = " + Arrays.stream(naiveGreedyResults).max().getAsDouble());
@@ -227,6 +280,10 @@ public class Main extends Application {
                 System.out.println("Max result for random steepest = " + Arrays.stream(randomSteepestResults).max().getAsDouble());
             if (EXECUTE_STEEPEST_CANDIDATE)
                 System.out.println("Max result for naive steepest candidate = " + Arrays.stream(naiveSteepestCandidateResults).max().getAsDouble());
+            if (EXECUTE_STEEPEST_CACHE)
+                System.out.println("Max result for naive steepest cache = " + Arrays.stream(naiveSteepestCacheResults).max().getAsDouble());
+            if (EXECUTE_STEEPEST_CANDIDATE_CACHE)
+                System.out.println("Max result for naive steepest candidate + cache = " + Arrays.stream(naiveSteepestCandidateCacheResults).max().getAsDouble());
 
             System.out.println("TIMING:");
             if (EXECUTE_GREEDY_NAIVE)
@@ -239,6 +296,10 @@ public class Main extends Application {
                 System.out.println("Min time for random steepest = " + Arrays.stream(randomSteepestTimes).min().getAsDouble());
             if (EXECUTE_STEEPEST_CANDIDATE)
                 System.out.println("Min time for naive steepest candidate = " + Arrays.stream(naiveSteepestCandidateTimes).min().getAsDouble());
+            if (EXECUTE_STEEPEST_CACHE)
+                System.out.println("Min time for naive steepest cache = " + Arrays.stream(naiveSteepestCacheTimes).min().getAsDouble());
+            if (EXECUTE_STEEPEST_CANDIDATE_CACHE)
+                System.out.println("Min time for naive steepest candidate + cache = " + Arrays.stream(naiveSteepestCandidateCacheTimes).min().getAsDouble());
 
             if (EXECUTE_GREEDY_NAIVE)
                 System.out.println("Mean time for naive greedy = " + Arrays.stream(naiveGreedyTimes).average().getAsDouble());
@@ -250,6 +311,10 @@ public class Main extends Application {
                 System.out.println("Mean time for random steepest = " + Arrays.stream(randomSteepestTimes).average().getAsDouble());
             if (EXECUTE_STEEPEST_CANDIDATE)
                 System.out.println("Mean time for naive steepest candidate = " + Arrays.stream(naiveSteepestCandidateTimes).average().getAsDouble());
+            if (EXECUTE_STEEPEST_CACHE)
+                System.out.println("Mean time for naive steepest cache = " + Arrays.stream(naiveSteepestCacheTimes).average().getAsDouble());
+            if (EXECUTE_STEEPEST_CANDIDATE_CACHE)
+                System.out.println("Mean time for naive steepest candidate + cache = " + Arrays.stream(naiveSteepestCandidateCacheTimes).average().getAsDouble());
 
             if (EXECUTE_GREEDY_NAIVE)
                 System.out.println("Max time for naive greedy = " + Arrays.stream(naiveGreedyTimes).max().getAsDouble());
@@ -261,6 +326,10 @@ public class Main extends Application {
                 System.out.println("Max time for random steepest = " + Arrays.stream(randomSteepestTimes).max().getAsDouble());
             if (EXECUTE_STEEPEST_CANDIDATE)
                 System.out.println("Max time for naive steepest candidate = " + Arrays.stream(naiveSteepestCandidateTimes).max().getAsDouble());
+            if (EXECUTE_STEEPEST_CACHE)
+                System.out.println("Max time for naive steepest cache = " + Arrays.stream(naiveSteepestCacheTimes).max().getAsDouble());
+            if (EXECUTE_STEEPEST_CANDIDATE_CACHE)
+                System.out.println("Max time for naive steepest candidate + cache = " + Arrays.stream(naiveSteepestCandidateCacheTimes).max().getAsDouble());
         }
     }
 

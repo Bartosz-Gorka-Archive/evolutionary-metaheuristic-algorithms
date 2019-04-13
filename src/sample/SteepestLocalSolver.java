@@ -1,11 +1,9 @@
 package sample;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
+import java.util.*;
 
 public class SteepestLocalSolver {
+    private final boolean useCache;
     /**
      * Assignment to group
      */
@@ -14,7 +12,7 @@ public class SteepestLocalSolver {
      * Mean distance between connections
      */
     private double penalties;
-    private Boolean isCandidateAlgorithm;
+    private boolean isCandidateAlgorithm;
     private int candidatesNumber;
 
     /**
@@ -22,9 +20,10 @@ public class SteepestLocalSolver {
      *
      * @param groups Basic assignment to groups
      */
-    public SteepestLocalSolver(HashMap<Integer, HashSet<Integer>> groups, Boolean isCandidateAlgorithm, int candidatesNumber) {
+    public SteepestLocalSolver(HashMap<Integer, HashSet<Integer>> groups, boolean isCandidateAlgorithm, int candidatesNumber, boolean useCache) {
         this.groups = new HashMap<>();
         this.isCandidateAlgorithm = isCandidateAlgorithm;
+        this.useCache = useCache;
         this.candidatesNumber = candidatesNumber;
         for (Map.Entry<Integer, HashSet<Integer>> entry : groups.entrySet()) {
             HashSet<Integer> set = new HashSet<>(entry.getValue());
@@ -45,8 +44,15 @@ public class SteepestLocalSolver {
         Judge judge = new Judge();
         this.penalties = judge.calcMeanDistance(this.groups, distanceMatrix);
         int totalElements = distanceMatrix.length;
+        int totalArcs = judge.getArcs();
+        double totalDistance = judge.getSumOfDistances();
+
+        // Cache - start with empty
+        ArrayList<MoveBetweenClass> cache = new ArrayList<>();
+        int iteration = 0;
 
         while (penaltiesChanged) {
+            iteration++;
             double bestPenalties = this.penalties;
             int[] bestMove = {-1, -1, -1};
             penaltiesChanged = false;
@@ -111,15 +117,35 @@ public class SteepestLocalSolver {
             }
 
             // Check moves
-            for (int[] move : moves) {
-                judge.calculateChangedDistance(this.groups, move, distanceMatrix);
+            if (this.useCache) {
+                for (int[] move : moves) {
+                    MoveBetweenClass m = new MoveBetweenClass(move[0], move[1], move[2]);
+                    if (!cache.contains(m)) {
+                        judge.calculateChangedDistance(this.groups, move, distanceMatrix);
+                        m.setArcs(judge.getArcs());
+                        m.setSumOfDistances(judge.getSumOfDistances());
+                        cache.add(m);
+                    }
 
-                // Verify move
-                if (judge.tempMeanDistance() < bestPenalties) {
-                    bestPenalties = judge.tempMeanDistance();
-                    bestMove[0] = move[0];
-                    bestMove[1] = move[1];
-                    bestMove[2] = move[2];
+                    // Verify move
+                    MoveBetweenClass element = cache.stream().filter(potentialMove -> potentialMove.equals(m)).findFirst().get();
+                    if (element.getPenalties() < bestPenalties) {
+                        bestPenalties = element.getPenalties();
+                        bestMove[0] = m.getPointID();
+                        bestMove[1] = m.getStartClassID();
+                        bestMove[2] = m.getTargetClassID();
+                    }
+                }
+            } else {
+                for (int[] move : moves) {
+                    judge.calculateChangedDistance(this.groups, move, distanceMatrix);
+
+                    if (judge.tempMeanDistance() < bestPenalties) {
+                        bestPenalties = judge.tempMeanDistance();
+                        bestMove[0] = move[0];
+                        bestMove[1] = move[1];
+                        bestMove[2] = move[2];
+                    }
                 }
             }
 
@@ -135,6 +161,29 @@ public class SteepestLocalSolver {
 
                 // Enable next iteration
                 penaltiesChanged = true;
+
+                if (this.useCache) {
+                    // Calculate changes
+                    int changedArcs = totalArcs - judge.getArcs();
+                    double changedDistance = totalDistance - judge.getSumOfDistances();
+
+                    totalArcs = judge.getArcs();
+                    totalDistance = judge.getSumOfDistances();
+
+                    // Remove changed groups from cache
+                    for (Iterator<MoveBetweenClass> i = cache.iterator(); i.hasNext(); ) {
+                        MoveBetweenClass m = i.next();
+                        if (m.getTargetClassID() == bestMove[2] || m.getStartClassID() == bestMove[1]) {
+                            i.remove();
+                        } else {
+                            m.updateData(changedArcs, changedDistance);
+                        }
+                    }
+
+                    if (iteration % 5 == 0) {
+                        cache.clear();
+                    }
+                }
             }
         }
     }
