@@ -1,6 +1,9 @@
 package sample;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
 
 public class SteepestLocalSolver {
     /**
@@ -13,6 +16,7 @@ public class SteepestLocalSolver {
     private double penalties;
     private Boolean isCandidateAlgorithm;
     private int candidatesNumber;
+
     /**
      * Steepest Local Search solver
      *
@@ -21,7 +25,7 @@ public class SteepestLocalSolver {
     public SteepestLocalSolver(HashMap<Integer, HashSet<Integer>> groups, Boolean isCandidateAlgorithm, int candidatesNumber) {
         this.groups = new HashMap<>();
         this.isCandidateAlgorithm = isCandidateAlgorithm;
-        this.candidatesNumber= candidatesNumber;
+        this.candidatesNumber = candidatesNumber;
         for (Map.Entry<Integer, HashSet<Integer>> entry : groups.entrySet()) {
             HashSet<Integer> set = new HashSet<>(entry.getValue());
             this.groups.put(entry.getKey(), set);
@@ -40,66 +44,70 @@ public class SteepestLocalSolver {
         // Prepare basic penalties - reference
         Judge judge = new Judge();
         this.penalties = judge.calcMeanDistance(this.groups, distanceMatrix);
+        int totalElements = distanceMatrix.length;
 
         while (penaltiesChanged) {
             double bestPenalties = this.penalties;
             int[] bestMove = {-1, -1, -1};
             penaltiesChanged = false;
 
-            ArrayList<int[]> moves = new ArrayList<>();
+            ArrayList<int[]> moves;
 
             if (isCandidateAlgorithm) {
                 // Prepare potential moves
                 moves = new ArrayList<>();
 
-                //create temporary distanceMatrix
-                double[][] distanceMatrixTemp = new double [distanceMatrix.length][distanceMatrix.length];
-                for (int i = 0; i < distanceMatrix.length; i++)
-                    for (int j = 0; j < distanceMatrix[i].length; j++)
-                        distanceMatrixTemp[i][j] = distanceMatrix[i][j];
+                // Create temporary distance matrix
+                double[][] distanceMatrixTemp = new double[totalElements][totalElements];
+                for (int i = 0; i < totalElements; i++) {
+                    System.arraycopy(distanceMatrix[i], 0, distanceMatrixTemp[i], 0, totalElements);
+                }
 
                 for (Map.Entry<Integer, HashSet<Integer>> entry : this.groups.entrySet()) {
-                    for (Integer id : entry.getValue()) { //for each element in group
-                        for (int cn = 0; cn < Math.min(candidatesNumber, distanceMatrix.length); cn++) { //add proper number of neighbors
-                            double minimunDistance = 999999.0;
+                    for (Integer id : entry.getValue()) {
+                        // Add proper number of neighbors
+                        for (int cn = 0; cn < Math.min(candidatesNumber, totalElements); cn++) {
+                            double minDistance = Double.MAX_VALUE;
                             int minimumId = 0;
-                            for (int i = 0; i < distanceMatrixTemp.length; i++) {
-                                if (id != i && distanceMatrixTemp[id][i] != -1.0 && distanceMatrixTemp[id][i] < minimunDistance) {
-                                    minimunDistance = distanceMatrixTemp[id][i];
+
+                            for (int i = 0; i < totalElements; i++) {
+                                double value = distanceMatrixTemp[id][i];
+                                if (id != i && value < minDistance && value != -1.0) {
+                                    minDistance = value;
                                     minimumId = i;
                                 }
                             }
+
                             for (int groupId : this.groups.keySet()) {
                                 if (groupId != entry.getKey() && this.groups.get(groupId).contains(minimumId)) {
-                                    int[] record = {id, entry.getKey(), groupId}; //{who, from_group, to_group}
+                                    // {who, from_group, to_group}
+                                    int[] record = {id, entry.getKey(), groupId};
                                     if (!moves.contains(record)) {
                                         moves.add(record);
                                     }
                                     break;
                                 }
                             }
+
                             distanceMatrixTemp[id][minimumId] = -1.0;
                             distanceMatrixTemp[minimumId][id] = -1.0;
                         }
                     }
                 }
-                System.out.println(moves.size() + " candidate");
-            }
-            else {
+            } else {
                 // Prepare potential moves
                 moves = new ArrayList<>();
                 for (Map.Entry<Integer, HashSet<Integer>> entry : this.groups.entrySet()) {
                     for (Integer id : entry.getValue()) {
                         for (int groupId : this.groups.keySet()) {
                             if (groupId != entry.getKey()) {
-                                int[] record = {id, entry.getKey(), groupId}; //{who, from_group, to_group}
+                                // {who, from_group, to_group}
+                                int[] record = {id, entry.getKey(), groupId};
                                 moves.add(record);
                             }
                         }
                     }
                 }
-                System.out.println(moves.size() + " non candidate");
-
             }
 
             // Check moves

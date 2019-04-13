@@ -26,7 +26,6 @@ public class Main extends Application {
     private final static boolean EXECUTE_STEEPEST_NAIVE = true;
     private final static boolean EXECUTE_STEEPEST_RANDOM = false;
     private final static boolean EXECUTE_STEEPEST_CANDIDATE = true;
-
     /**
      * How many candidates we chose in steepest naive candidates algorithm
      */
@@ -66,7 +65,7 @@ public class Main extends Application {
                 bestNaiveSteepestResult = Double.MAX_VALUE, bestRandomSteepestResult = Double.MAX_VALUE,
                 bestNaiveSteepestCandidateResult = Double.MAX_VALUE;
 
-        //using for statistics
+        // Using for statistics
         long startTime;
 
         // Iterations
@@ -165,64 +164,103 @@ public class Main extends Application {
         }
 
         // Show groups on graph
-        new Drawer().drawInputInstance(coordinates, bestNaiveGreedyGroupsMST, "Naive greedy", true, true);
-        new Drawer().drawInputInstance(coordinates, bestNaiveGreedyGroupsMST, "Naive greedy", true, false);
-        new Drawer().drawInputInstance(coordinates, bestNaiveGreedyGroupsConnections, "Naive greedy", false, true);
+        if (EXECUTE_GREEDY_NAIVE) {
+            new Drawer().drawInputInstance(coordinates, bestNaiveGreedyGroupsMST, "Naive greedy", true, true);
+            new Drawer().drawInputInstance(coordinates, bestNaiveGreedyGroupsMST, "Naive greedy", true, false);
+            new Drawer().drawInputInstance(coordinates, bestNaiveGreedyGroupsConnections, "Naive greedy", false, true);
+        }
 
-        new Drawer().drawInputInstance(coordinates, bestRandomGreedyGroupsMST, "Random greedy", true, true);
-        new Drawer().drawInputInstance(coordinates, bestRandomGreedyGroupsMST, "Random greedy", true, false);
-        new Drawer().drawInputInstance(coordinates, bestRandomGreedyGroupsConnections, "Random greedy", false, true);
+        if (EXECUTE_GREEDY_RANDOM) {
+            new Drawer().drawInputInstance(coordinates, bestRandomGreedyGroupsMST, "Random greedy", true, true);
+            new Drawer().drawInputInstance(coordinates, bestRandomGreedyGroupsMST, "Random greedy", true, false);
+            new Drawer().drawInputInstance(coordinates, bestRandomGreedyGroupsConnections, "Random greedy", false, true);
+        }
 
-        new Drawer().drawInputInstance(coordinates, bestNaiveSteepestGroupsMST, "Naive steepest", true, true);
-        new Drawer().drawInputInstance(coordinates, bestNaiveSteepestGroupsMST, "Naive steepest", true, false);
-        new Drawer().drawInputInstance(coordinates, bestNaiveSteepestGroupsConnections, "Naive steepest", false, true);
+        if (EXECUTE_STEEPEST_NAIVE) {
+            new Drawer().drawInputInstance(coordinates, bestNaiveSteepestGroupsMST, "Naive steepest", true, true);
+            new Drawer().drawInputInstance(coordinates, bestNaiveSteepestGroupsMST, "Naive steepest", true, false);
+            new Drawer().drawInputInstance(coordinates, bestNaiveSteepestGroupsConnections, "Naive steepest", false, true);
+        }
 
-        new Drawer().drawInputInstance(coordinates, bestRandomSteepestGroupsMST, "Random steepest", true, true);
-        new Drawer().drawInputInstance(coordinates, bestRandomSteepestGroupsMST, "Random steepest", true, false);
-        new Drawer().drawInputInstance(coordinates, bestRandomSteepestGroupsConnections, "Random steepest", false, true);
+        if (EXECUTE_STEEPEST_RANDOM) {
+            new Drawer().drawInputInstance(coordinates, bestRandomSteepestGroupsMST, "Random steepest", true, true);
+            new Drawer().drawInputInstance(coordinates, bestRandomSteepestGroupsMST, "Random steepest", true, false);
+            new Drawer().drawInputInstance(coordinates, bestRandomSteepestGroupsConnections, "Random steepest", false, true);
+        }
 
-        new Drawer().drawInputInstance(coordinates, bestNaiveSteepestCandidateGroupsMST, "Naive steepest candidate", true, true);
-        new Drawer().drawInputInstance(coordinates, bestNaiveSteepestCandidateGroupsMST, "Naive steepest  candidate", true, false);
-        new Drawer().drawInputInstance(coordinates, bestNaiveSteepestCandidateGroupsConnections, "Naive steepest candidate", false, true);
+        if (EXECUTE_STEEPEST_CANDIDATE) {
+            new Drawer().drawInputInstance(coordinates, bestNaiveSteepestCandidateGroupsMST, "Naive steepest candidate", true, true);
+            new Drawer().drawInputInstance(coordinates, bestNaiveSteepestCandidateGroupsMST, "Naive steepest candidate", true, false);
+            new Drawer().drawInputInstance(coordinates, bestNaiveSteepestCandidateGroupsConnections, "Naive steepest candidate", false, true);
+        }
 
         if (SHOW_STATISTICS) {
-            System.out.println("Min result for naive greedy = " + bestNaiveGreedyResult);
-            System.out.println("Min result for random greedy = " + bestRandomGreedyResult);
-            System.out.println("Min result for naive steepest = " + bestNaiveSteepestResult);
-            System.out.println("Min result for random steepest = " + bestRandomSteepestResult);
-            System.out.println("Min result for naive steepest candidate = " + bestNaiveSteepestCandidateResult);
+            if (EXECUTE_GREEDY_NAIVE)
+                System.out.println("Min result for naive greedy = " + bestNaiveGreedyResult);
+            if (EXECUTE_GREEDY_RANDOM)
+                System.out.println("Min result for random greedy = " + bestRandomGreedyResult);
+            if (EXECUTE_STEEPEST_NAIVE)
+                System.out.println("Min result for naive steepest = " + bestNaiveSteepestResult);
+            if (EXECUTE_STEEPEST_RANDOM)
+                System.out.println("Min result for random steepest = " + bestRandomSteepestResult);
+            if (EXECUTE_STEEPEST_CANDIDATE)
+                System.out.println("Min result for naive steepest candidate = " + bestNaiveSteepestCandidateResult);
 
-            System.out.println("Mean result for naive greedy = " + Arrays.stream(naiveGreedyResults).average().getAsDouble());
-            System.out.println("Mean result for random greedy = " + Arrays.stream(randomGreedyResults).average().getAsDouble());
-            System.out.println("Mean result for naive steepest = " + Arrays.stream(naiveSteepestResults).average().getAsDouble());
-            System.out.println("Mean result for random steepest = " + Arrays.stream(randomSteepestResults).average().getAsDouble());
-            System.out.println("Mean result for naive steepest candidate = " + Arrays.stream(naiveSteepestCandidateResults).average().getAsDouble());
+            if (EXECUTE_GREEDY_NAIVE)
+                System.out.println("Mean result for naive greedy = " + Arrays.stream(naiveGreedyResults).average().getAsDouble());
+            if (EXECUTE_GREEDY_RANDOM)
+                System.out.println("Mean result for random greedy = " + Arrays.stream(randomGreedyResults).average().getAsDouble());
+            if (EXECUTE_STEEPEST_NAIVE)
+                System.out.println("Mean result for naive steepest = " + Arrays.stream(naiveSteepestResults).average().getAsDouble());
+            if (EXECUTE_STEEPEST_RANDOM)
+                System.out.println("Mean result for random steepest = " + Arrays.stream(randomSteepestResults).average().getAsDouble());
+            if (EXECUTE_STEEPEST_CANDIDATE)
+                System.out.println("Mean result for naive steepest candidate = " + Arrays.stream(naiveSteepestCandidateResults).average().getAsDouble());
 
-            System.out.println("Max result for naive greedy = " + Arrays.stream(naiveGreedyResults).max().getAsDouble());
-            System.out.println("Max result for random greedy = " + Arrays.stream(randomGreedyResults).max().getAsDouble());
-            System.out.println("Max result for naive steepest = " + Arrays.stream(naiveSteepestResults).max().getAsDouble());
-            System.out.println("Max result for random steepest = " + Arrays.stream(randomSteepestResults).max().getAsDouble());
-            System.out.println("Max result for naive steepest candidate = " + Arrays.stream(naiveSteepestCandidateResults).max().getAsDouble());
+            if (EXECUTE_GREEDY_NAIVE)
+                System.out.println("Max result for naive greedy = " + Arrays.stream(naiveGreedyResults).max().getAsDouble());
+            if (EXECUTE_GREEDY_RANDOM)
+                System.out.println("Max result for random greedy = " + Arrays.stream(randomGreedyResults).max().getAsDouble());
+            if (EXECUTE_STEEPEST_NAIVE)
+                System.out.println("Max result for naive steepest = " + Arrays.stream(naiveSteepestResults).max().getAsDouble());
+            if (EXECUTE_STEEPEST_RANDOM)
+                System.out.println("Max result for random steepest = " + Arrays.stream(randomSteepestResults).max().getAsDouble());
+            if (EXECUTE_STEEPEST_CANDIDATE)
+                System.out.println("Max result for naive steepest candidate = " + Arrays.stream(naiveSteepestCandidateResults).max().getAsDouble());
 
             System.out.println("TIMING:");
-            System.out.println("Min time for naive greedy = " + Arrays.stream(naiveGreedyTimes).min().getAsDouble());
-            System.out.println("Min time for random greedy = " + Arrays.stream(randomGreedyTimes).min().getAsDouble());
-            System.out.println("Min time for naive steepest = " + Arrays.stream(naiveSteepestTimes).min().getAsDouble());
-            System.out.println("Min time for random steepest = " + Arrays.stream(randomSteepestTimes).min().getAsDouble());
-            System.out.println("Min time for naive steepest candidate = " + Arrays.stream(naiveSteepestCandidateTimes).min().getAsDouble());
+            if (EXECUTE_GREEDY_NAIVE)
+                System.out.println("Min time for naive greedy = " + Arrays.stream(naiveGreedyTimes).min().getAsDouble());
+            if (EXECUTE_GREEDY_RANDOM)
+                System.out.println("Min time for random greedy = " + Arrays.stream(randomGreedyTimes).min().getAsDouble());
+            if (EXECUTE_STEEPEST_NAIVE)
+                System.out.println("Min time for naive steepest = " + Arrays.stream(naiveSteepestTimes).min().getAsDouble());
+            if (EXECUTE_STEEPEST_RANDOM)
+                System.out.println("Min time for random steepest = " + Arrays.stream(randomSteepestTimes).min().getAsDouble());
+            if (EXECUTE_STEEPEST_CANDIDATE)
+                System.out.println("Min time for naive steepest candidate = " + Arrays.stream(naiveSteepestCandidateTimes).min().getAsDouble());
 
-            System.out.println("Mean time for naive greedy = " + Arrays.stream(naiveGreedyTimes).average().getAsDouble());
-            System.out.println("Mean time for random greedy = " + Arrays.stream(randomGreedyTimes).average().getAsDouble());
-            System.out.println("Mean time for naive steepest = " + Arrays.stream(naiveSteepestTimes).average().getAsDouble());
-            System.out.println("Mean time for random steepest = " + Arrays.stream(randomSteepestTimes).average().getAsDouble());
-            System.out.println("Mean time for naive steepest candidate = " + Arrays.stream(naiveSteepestCandidateTimes).average().getAsDouble());
+            if (EXECUTE_GREEDY_NAIVE)
+                System.out.println("Mean time for naive greedy = " + Arrays.stream(naiveGreedyTimes).average().getAsDouble());
+            if (EXECUTE_GREEDY_RANDOM)
+                System.out.println("Mean time for random greedy = " + Arrays.stream(randomGreedyTimes).average().getAsDouble());
+            if (EXECUTE_STEEPEST_NAIVE)
+                System.out.println("Mean time for naive steepest = " + Arrays.stream(naiveSteepestTimes).average().getAsDouble());
+            if (EXECUTE_STEEPEST_RANDOM)
+                System.out.println("Mean time for random steepest = " + Arrays.stream(randomSteepestTimes).average().getAsDouble());
+            if (EXECUTE_STEEPEST_CANDIDATE)
+                System.out.println("Mean time for naive steepest candidate = " + Arrays.stream(naiveSteepestCandidateTimes).average().getAsDouble());
 
-            System.out.println("Max time for naive greedy = " + Arrays.stream(naiveGreedyTimes).max().getAsDouble());
-            System.out.println("Max time for random greedy = " + Arrays.stream(randomGreedyTimes).max().getAsDouble());
-            System.out.println("Max time for naive steepest = " + Arrays.stream(naiveSteepestTimes).max().getAsDouble());
-            System.out.println("Max time for random steepest = " + Arrays.stream(randomSteepestTimes).max().getAsDouble());
-            System.out.println("Max time for naive steepest candidate = " + Arrays.stream(naiveSteepestCandidateTimes).max().getAsDouble());
-
+            if (EXECUTE_GREEDY_NAIVE)
+                System.out.println("Max time for naive greedy = " + Arrays.stream(naiveGreedyTimes).max().getAsDouble());
+            if (EXECUTE_GREEDY_RANDOM)
+                System.out.println("Max time for random greedy = " + Arrays.stream(randomGreedyTimes).max().getAsDouble());
+            if (EXECUTE_STEEPEST_NAIVE)
+                System.out.println("Max time for naive steepest = " + Arrays.stream(naiveSteepestTimes).max().getAsDouble());
+            if (EXECUTE_STEEPEST_RANDOM)
+                System.out.println("Max time for random steepest = " + Arrays.stream(randomSteepestTimes).max().getAsDouble());
+            if (EXECUTE_STEEPEST_CANDIDATE)
+                System.out.println("Max time for naive steepest candidate = " + Arrays.stream(naiveSteepestCandidateTimes).max().getAsDouble());
         }
     }
 
