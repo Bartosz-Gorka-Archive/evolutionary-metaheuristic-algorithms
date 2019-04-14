@@ -79,6 +79,7 @@ public class Main extends Application {
 
         // Iterations
         for (int iteration = 0; iteration < TESTS_NUMBER; iteration++) {
+            System.out.println("Iteration " + (iteration + 1));
             /*
              * INITIALIZATION STEP IN ITERATION
              */
