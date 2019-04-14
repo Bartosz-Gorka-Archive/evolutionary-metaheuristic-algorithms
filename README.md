@@ -242,3 +242,33 @@ Max time for random greedy = 7.12567084E8
 Max time for naive steepest = 3.289188956E9
 Max time for random steepest = 7.511130793E9
 ```
+
+## Task 3
+```
+Min result for naive steepest = 26.395535870863323
+Min result for naive steepest candidate = 26.652335284818715
+Min result for naive steepest cache = 26.69310154235926
+Min result for naive steepest candidate + cache = 27.157902517321197
+Mean result for naive steepest = 27.270848152743273
+Mean result for naive steepest candidate = 27.82201849737944
+Mean result for naive steepest cache = 28.689225709127886
+Mean result for naive steepest candidate + cache = 29.56522990870902
+Max result for naive steepest = 28.672883938984224
+Max result for naive steepest candidate = 31.253620683755926
+Max result for naive steepest cache = 32.775639549293956
+Max result for naive steepest candidate + cache = 34.09466226249165
+
+TIMING:
+Min time for naive steepest = 8.16427113E8
+Min time for naive steepest candidate = 5.50219609E8
+Min time for naive steepest cache = 6.570077491E9
+Min time for naive steepest candidate + cache = 1.35000992E8
+Mean time for naive steepest = 1.40433823153E9
+Mean time for naive steepest candidate = 9.6736037531E8
+Mean time for naive steepest cache = 2.349565652522E10
+Mean time for naive steepest candidate + cache = 6.8870383674E8
+Max time for naive steepest = 2.328463603E9
+Max time for naive steepest candidate = 2.050889699E9
+Max time for naive steepest cache = 4.0168981048E10
+Max time for naive steepest candidate + cache = 2.520349143E9
+```
