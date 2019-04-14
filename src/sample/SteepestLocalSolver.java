@@ -49,10 +49,8 @@ public class SteepestLocalSolver {
 
         // Cache - start with empty
         ArrayList<MoveBetweenClass> cache = new ArrayList<>();
-        int iteration = 0;
 
         while (penaltiesChanged) {
-            iteration++;
             double bestPenalties = this.penalties;
             int[] bestMove = {-1, -1, -1};
             penaltiesChanged = false;
@@ -173,15 +171,12 @@ public class SteepestLocalSolver {
                     // Remove changed groups from cache
                     for (Iterator<MoveBetweenClass> i = cache.iterator(); i.hasNext(); ) {
                         MoveBetweenClass m = i.next();
-                        if (m.getTargetClassID() == bestMove[2] || m.getStartClassID() == bestMove[1]) {
+                        if (m.getTargetClassID() == bestMove[1] || m.getTargetClassID() == bestMove[2]
+                                || m.getStartClassID() == bestMove[1] || m.getStartClassID() == bestMove[2]) {
                             i.remove();
                         } else {
                             m.updateData(changedArcs, changedDistance);
                         }
-                    }
-
-                    if (iteration % 5 == 0) {
-                        cache.clear();
                     }
                 }
             }
