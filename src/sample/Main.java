@@ -30,7 +30,7 @@ public class Main extends Application {
     private final static boolean EXECUTE_STEEPEST_CACHE = false;
     private final static boolean EXECUTE_STEEPEST_MSLS = false;
     private final static boolean EXECUTE_ITERATED_SMALL_PERTURBATION = true;
-    private final static boolean EXECUTE_ITERATED_BIG_PERTURBATION = false;
+    private final static boolean EXECUTE_ITERATED_BIG_PERTURBATION = true;
 
     /**
      * How many candidates we chose in steepest naive candidates algorithm
@@ -224,8 +224,8 @@ public class Main extends Application {
             long bigPertubationTimeLimit = 0L;
             if (EXECUTE_ITERATED_SMALL_PERTURBATION) {
                 startTime = System.nanoTime();
-                IteratedLocalSolver iteratedLocalSolver = new IteratedLocalSolver(randomInstances);
-                iteratedLocalSolver.run(distanceMatrix, 5, true, 0L);
+                IteratedLocalSolver iteratedLocalSolver = new IteratedLocalSolver(randomInstances, true);
+                iteratedLocalSolver.run(distanceMatrix, 50, 0L);
                 iteratedSmallPerturbationResults[iteration] = iteratedLocalSolver.getBestPenalties();
                 if (iteratedLocalSolver.getBestPenalties() < bestIteratedSmallPerturbationResult) {
                     bestIteratedSmallPerturbationResult = iteratedLocalSolver.getBestPenalties();
@@ -237,8 +237,8 @@ public class Main extends Application {
             }
             if (EXECUTE_ITERATED_BIG_PERTURBATION) {
                 startTime = System.nanoTime();
-                IteratedLocalSolver iteratedLocalSolver = new IteratedLocalSolver(randomInstances);
-                iteratedLocalSolver.run(distanceMatrix, 0, false, bigPertubationTimeLimit);
+                IteratedLocalSolver iteratedLocalSolver = new IteratedLocalSolver(randomInstances, false);
+                iteratedLocalSolver.run(distanceMatrix, 0,  bigPertubationTimeLimit);
                 iteratedBigPerturbationResults[iteration] = iteratedLocalSolver.getBestPenalties();
                 if (iteratedLocalSolver.getBestPenalties() < bestIteratedBigPerturbationResult) {
                     bestIteratedBigPerturbationResult = iteratedLocalSolver.getBestPenalties();
