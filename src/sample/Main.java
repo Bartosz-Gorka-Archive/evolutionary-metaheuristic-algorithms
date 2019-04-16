@@ -30,6 +30,8 @@ public class Main extends Application {
     private final static boolean EXECUTE_STEEPEST_CACHE = false;
     private final static boolean EXECUTE_STEEPEST_MSLS = false;
     private final static boolean EXECUTE_ITERATED_SMALL_PERTURBATION = true;
+    private final static boolean EXECUTE_ITERATED_BIG_PERTURBATION = true;
+
     /**
      * How many candidates we chose in steepest naive candidates algorithm
      */
@@ -65,24 +67,26 @@ public class Main extends Application {
         HashSet<ArrayList<PointsPath>> bestRandomSteepestMSLSGroupsMST = new HashSet<>();
         HashSet<ArrayList<PointsPath>> bestIteratedSmallPerturbationGroupsConnections = new HashSet<>();
         HashSet<ArrayList<PointsPath>> bestIteratedSmallPerturbationGroupsMST = new HashSet<>();
+        HashSet<ArrayList<PointsPath>> bestIteratedBigPerturbationGroupsConnections = new HashSet<>();
+        HashSet<ArrayList<PointsPath>> bestIteratedBigPerturbationGroupsMST = new HashSet<>();
 
         double[] naiveGreedyResults = new double[TESTS_NUMBER], naiveSteepestResults = new double[TESTS_NUMBER],
                 randomGreedyResults = new double[TESTS_NUMBER], randomSteepestResults = new double[TESTS_NUMBER],
                 naiveSteepestCandidateResults = new double[TESTS_NUMBER], naiveSteepestCacheResults = new double[TESTS_NUMBER],
                 naiveSteepestCandidateCacheResults = new double[TESTS_NUMBER], randomSteepestMSLSResults = new double[TESTS_NUMBER],
-                iteratedSmallPerturbationResults = new double[TESTS_NUMBER],
+                iteratedSmallPerturbationResults = new double[TESTS_NUMBER], iteratedBigPerturbationResults = new double[TESTS_NUMBER],
 
                 naiveGreedyTimes = new double[TESTS_NUMBER], naiveSteepestTimes = new double[TESTS_NUMBER],
                 randomGreedyTimes = new double[TESTS_NUMBER], randomSteepestTimes = new double[TESTS_NUMBER],
                 naiveSteepestCandidateTimes = new double[TESTS_NUMBER], naiveSteepestCacheTimes = new double[TESTS_NUMBER],
                 naiveSteepestCandidateCacheTimes = new double[TESTS_NUMBER], randomSteepestMSLSTimes = new double[TESTS_NUMBER],
-                iteratedSmallPerturbationTimes = new double[TESTS_NUMBER];
+                iteratedSmallPerturbationTimes = new double[TESTS_NUMBER], iteratedBigPerturbationTimes = new double[TESTS_NUMBER];
 
         double bestNaiveGreedyResult = Double.MAX_VALUE, bestRandomGreedyResult = Double.MAX_VALUE,
                 bestNaiveSteepestResult = Double.MAX_VALUE, bestRandomSteepestResult = Double.MAX_VALUE,
                 bestNaiveSteepestCandidateResult = Double.MAX_VALUE, bestNaiveSteepestCacheResult = Double.MAX_VALUE,
                 bestNaiveSteepestCandidateCacheResult = Double.MAX_VALUE, bestRandomSteepestMSLSResult = Double.MAX_VALUE,
-                bestIteratedSmallPerturbationResult = Double.MAX_VALUE;
+                bestIteratedSmallPerturbationResult = Double.MAX_VALUE, bestIteratedBigPerturbationResult = Double.MAX_VALUE;
 
         // Using for statistics
         long startTime;
@@ -217,6 +221,7 @@ public class Main extends Application {
                 }
                 randomSteepestMSLSTimes[iteration] = System.nanoTime() - startTime;
             }
+            long bigPertubationTimeLimit = 0L;
             if (EXECUTE_ITERATED_SMALL_PERTURBATION) {
                 startTime = System.nanoTime();
                 IteratedLocalSolver iteratedLocalSolver = new IteratedLocalSolver(randomInstances);
@@ -226,8 +231,21 @@ public class Main extends Application {
                     bestIteratedSmallPerturbationResult = iteratedLocalSolver.getBestPenalties();
                     bestIteratedSmallPerturbationGroupsMST = castLocalSearchToMSTGraph(iteratedLocalSolver.getBestGroups(), distanceMatrix);
                     bestIteratedSmallPerturbationGroupsConnections = castLocalSearchToConnectionGraph(iteratedLocalSolver.getBestGroups(), distanceMatrix);
+                    bigPertubationTimeLimit = iteratedLocalSolver.getTimeLimit();
                 }
                 iteratedSmallPerturbationTimes[iteration] = System.nanoTime() - startTime;
+            }
+            if (EXECUTE_ITERATED_BIG_PERTURBATION) {
+                startTime = System.nanoTime();
+                IteratedLocalSolver iteratedLocalSolver = new IteratedLocalSolver(randomInstances);
+                iteratedLocalSolver.run(distanceMatrix, 0, false, bigPertubationTimeLimit);
+                iteratedBigPerturbationResults[iteration] = iteratedLocalSolver.getBestPenalties();
+                if (iteratedLocalSolver.getBestPenalties() < bestIteratedBigPerturbationResult) {
+                    bestIteratedBigPerturbationResult = iteratedLocalSolver.getBestPenalties();
+                    bestIteratedBigPerturbationGroupsMST = castLocalSearchToMSTGraph(iteratedLocalSolver.getBestGroups(), distanceMatrix);
+                    bestIteratedBigPerturbationGroupsConnections = castLocalSearchToConnectionGraph(iteratedLocalSolver.getBestGroups(), distanceMatrix);
+                }
+                iteratedBigPerturbationTimes[iteration] = System.nanoTime() - startTime;
             }
         }
 
@@ -273,15 +291,23 @@ public class Main extends Application {
             new Drawer().drawInputInstance(coordinates, bestNaiveSteepestCandidateCacheGroupsMST, "Naive steepest candidate + cache", true, false);
             new Drawer().drawInputInstance(coordinates, bestNaiveSteepestCandidateCacheGroupsConnections, "Naive steepest candidate + cache", false, true);
         }
+
         if (EXECUTE_STEEPEST_MSLS) {
             new Drawer().drawInputInstance(coordinates, bestRandomSteepestMSLSGroupsMST, "Random steepest MSLS", true, true);
             new Drawer().drawInputInstance(coordinates, bestRandomSteepestMSLSGroupsMST, "Random steepest MSLS", true, false);
             new Drawer().drawInputInstance(coordinates, bestRandomSteepestMSLSGroupsConnections, "Random steepest MSLS", false, true);
         }
+
         if (EXECUTE_ITERATED_SMALL_PERTURBATION) {
             new Drawer().drawInputInstance(coordinates, bestIteratedSmallPerturbationGroupsMST, "Iterated small perturbation", true, true);
-            new Drawer().drawInputInstance(coordinates, bestIteratedSmallPerturbationGroupsMST, "Iterated small perturbation MSLS", true, false);
+            new Drawer().drawInputInstance(coordinates, bestIteratedSmallPerturbationGroupsMST, "Iterated small perturbation", true, false);
             new Drawer().drawInputInstance(coordinates, bestIteratedSmallPerturbationGroupsConnections, "Iterated small perturbation", false, true);
+        }
+
+        if (EXECUTE_ITERATED_BIG_PERTURBATION) {
+            new Drawer().drawInputInstance(coordinates, bestIteratedBigPerturbationGroupsMST, "Iterated big perturbation", true, true);
+            new Drawer().drawInputInstance(coordinates, bestIteratedBigPerturbationGroupsMST, "Iterated big perturbation", true, false);
+            new Drawer().drawInputInstance(coordinates, bestIteratedBigPerturbationGroupsConnections, "Iterated big perturbation", false, true);
         }
 
         if (SHOW_STATISTICS) {
@@ -303,6 +329,8 @@ public class Main extends Application {
                 System.out.println("Min result for random steepest MSLS = " + bestRandomSteepestMSLSResult);
             if (EXECUTE_ITERATED_SMALL_PERTURBATION)
                 System.out.println("Min result for iterated small perturbation = " + bestIteratedSmallPerturbationResult);
+            if (EXECUTE_ITERATED_BIG_PERTURBATION)
+                System.out.println("Min result for iterated big perturbation = " + bestIteratedBigPerturbationResult);
 
             if (EXECUTE_GREEDY_NAIVE)
                 System.out.println("Mean result for naive greedy = " + Arrays.stream(naiveGreedyResults).average().getAsDouble());
@@ -322,6 +350,8 @@ public class Main extends Application {
                 System.out.println("Mean result for random steepest MSLS = " + Arrays.stream(randomSteepestMSLSResults).average().getAsDouble());
             if (EXECUTE_ITERATED_SMALL_PERTURBATION)
                 System.out.println("Mean result for iterated small perturbation = " + Arrays.stream(iteratedSmallPerturbationResults).average().getAsDouble());
+            if (EXECUTE_ITERATED_BIG_PERTURBATION)
+                System.out.println("Mean result for iterated big perturbation = " + Arrays.stream(iteratedBigPerturbationResults).average().getAsDouble());
 
             if (EXECUTE_GREEDY_NAIVE)
                 System.out.println("Max result for naive greedy = " + Arrays.stream(naiveGreedyResults).max().getAsDouble());
@@ -341,6 +371,8 @@ public class Main extends Application {
                 System.out.println("Max result for random steepest MSLS = " + Arrays.stream(randomSteepestMSLSResults).max().getAsDouble());
             if (EXECUTE_ITERATED_SMALL_PERTURBATION)
                 System.out.println("Max result for iterated small perturbation = " + Arrays.stream(iteratedSmallPerturbationResults).max().getAsDouble());
+            if (EXECUTE_ITERATED_BIG_PERTURBATION)
+                System.out.println("Max result for iterated big perturbation = " + Arrays.stream(iteratedBigPerturbationResults).max().getAsDouble());
 
             System.out.println("TIMING:");
             if (EXECUTE_GREEDY_NAIVE)
@@ -361,6 +393,8 @@ public class Main extends Application {
                 System.out.println("Min time for random steepest MSLS = " + Arrays.stream(randomSteepestMSLSTimes).min().getAsDouble());
             if (EXECUTE_ITERATED_SMALL_PERTURBATION)
                 System.out.println("Min time for iterated small perturbation = " + Arrays.stream(iteratedSmallPerturbationTimes).min().getAsDouble());
+            if (EXECUTE_ITERATED_BIG_PERTURBATION)
+                System.out.println("Min time for iterated big perturbation = " + Arrays.stream(iteratedBigPerturbationTimes).min().getAsDouble());
 
             if (EXECUTE_GREEDY_NAIVE)
                 System.out.println("Mean time for naive greedy = " + Arrays.stream(naiveGreedyTimes).average().getAsDouble());
@@ -380,6 +414,8 @@ public class Main extends Application {
                 System.out.println("Mean time for random steepest MSLS = " + Arrays.stream(randomSteepestMSLSTimes).average().getAsDouble());
             if (EXECUTE_ITERATED_SMALL_PERTURBATION)
                 System.out.println("Mean time for iterated small perturbation = " + Arrays.stream(iteratedSmallPerturbationTimes).average().getAsDouble());
+            if (EXECUTE_ITERATED_BIG_PERTURBATION)
+                System.out.println("Mean time for iterated big perturbation = " + Arrays.stream(iteratedBigPerturbationTimes).average().getAsDouble());
 
             if (EXECUTE_GREEDY_NAIVE)
                 System.out.println("Max time for naive greedy = " + Arrays.stream(naiveGreedyTimes).max().getAsDouble());
@@ -399,6 +435,8 @@ public class Main extends Application {
                 System.out.println("Max time for random steepest MSLS = " + Arrays.stream(randomSteepestMSLSTimes).max().getAsDouble());
             if (EXECUTE_ITERATED_SMALL_PERTURBATION)
                 System.out.println("Max time for iterated small perturbation = " + Arrays.stream(iteratedSmallPerturbationTimes).max().getAsDouble());
+            if (EXECUTE_ITERATED_BIG_PERTURBATION)
+                System.out.println("Max time for iterated big perturbation = " + Arrays.stream(iteratedBigPerturbationTimes).max().getAsDouble());
         }
     }
 

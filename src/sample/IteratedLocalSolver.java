@@ -54,7 +54,12 @@ public class IteratedLocalSolver {
                 this.groups.put(entry.getKey(), set);
             }
 
-            smallGroupPerturbation();
+            if (isSmallPerturbation) {
+                smallGroupPerturbation();
+            }
+            else {
+                bigGroupPerturbation();
+            }
 
             SteepestLocalSolver randomSteepestLocalSolver = new SteepestLocalSolver(this.groups, false, 0, false);
             randomSteepestLocalSolver.run(distanceMatrix, 1);
@@ -77,7 +82,7 @@ public class IteratedLocalSolver {
     }
 
     /**
-     * Execute after assign global best groups to groups usung in single iteration
+     * Execute after assign global best groups to groups usung in single iteration when isSmallPerturbation == true
      */
     private void smallGroupPerturbation() {
 
@@ -96,8 +101,15 @@ public class IteratedLocalSolver {
             this.groups.get(targetRandomGroupId).add(pointID);
 
         }
-
     }
+
+    /**
+     * Execute after assign global best groups to groups usung in single iteration when isSmallPerturbation == false
+     */
+    private void bigGroupPerturbation() {
+        //TODO
+    }
+
     /**
      * To use it, you should first call `calc` method.
      *
@@ -132,5 +144,14 @@ public class IteratedLocalSolver {
      */
     public double getBestPenalties() {
         return this.bestPenalties;
+    }
+
+    /**
+     * To use it, you should first execute IteratedLocalSolver with isSmallPerturbation = true.
+     *
+     * @return time limit for big perturbation algorithm
+     */
+    public long getTimeLimit() {
+        return this.timeLimit;
     }
 }
