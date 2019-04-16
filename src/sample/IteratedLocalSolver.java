@@ -4,7 +4,7 @@ import java.util.*;
 
 public class IteratedLocalSolver {
 
-    private static int SMALL_PERTURBATION_CHANGES_NUMBER = 3;
+    private int SMALL_PERTURBATION_CHANGES_NUMBER;
     /**
      * Assignment to group
      */
@@ -30,11 +30,14 @@ public class IteratedLocalSolver {
     public IteratedLocalSolver(HashMap<Integer, HashSet<Integer>> groups) {
         this.bestGroups = new HashMap<>();
 
+        int numberOfpoints = 0;
         for (Map.Entry<Integer, HashSet<Integer>> entry : groups.entrySet()) {
             HashSet<Integer> set = new HashSet<>(entry.getValue());
+            numberOfpoints += set.size();
             this.bestGroups.put(entry.getKey(), set);
         }
         this.bestPenalties = Double.MAX_VALUE;
+        this.SMALL_PERTURBATION_CHANGES_NUMBER = (int) (numberOfpoints * 0.02);
     }
 
     /**
@@ -54,10 +57,10 @@ public class IteratedLocalSolver {
                 this.groups.put(entry.getKey(), set);
             }
 
-            if (isSmallPerturbation) {
+            if (iterationNo > 0 && isSmallPerturbation) {
                 smallGroupPerturbation();
             }
-            else {
+            else if (iterationNo > 0){
                 bigGroupPerturbation();
             }
 

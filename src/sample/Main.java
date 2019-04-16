@@ -30,7 +30,7 @@ public class Main extends Application {
     private final static boolean EXECUTE_STEEPEST_CACHE = false;
     private final static boolean EXECUTE_STEEPEST_MSLS = false;
     private final static boolean EXECUTE_ITERATED_SMALL_PERTURBATION = true;
-    private final static boolean EXECUTE_ITERATED_BIG_PERTURBATION = true;
+    private final static boolean EXECUTE_ITERATED_BIG_PERTURBATION = false;
 
     /**
      * How many candidates we chose in steepest naive candidates algorithm
