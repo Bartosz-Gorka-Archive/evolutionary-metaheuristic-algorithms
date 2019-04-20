@@ -89,13 +89,13 @@ public class IteratedLocalSearch {
         int startRandomGroupId, targetRandomGroupId;
 
         for (int i = 0; i < PERTURBATION_CHANGES_NUMBER; i++) {
-            //get a random group
+            // Get a random group
             do {
                 startRandomGroupId = rand.nextInt(this.groups.size());
                 targetRandomGroupId = rand.nextInt(this.groups.size());
+            } while (startRandomGroupId == targetRandomGroupId || this.groups.get(startRandomGroupId).size() == 1);
 
-            } while (startRandomGroupId == targetRandomGroupId);
-
+            // Get point ID
             Integer pointID = this.groups.get(startRandomGroupId).iterator().next();
             this.groups.get(startRandomGroupId).remove(pointID);
             this.groups.get(targetRandomGroupId).add(pointID);
