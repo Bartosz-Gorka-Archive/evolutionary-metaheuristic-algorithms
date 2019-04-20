@@ -2,7 +2,7 @@ package sample;
 
 import java.util.*;
 
-public class GreedyLocalSolver {
+public class GreedyLocalSolver implements SolverInterface {
     /**
      * Assignment to group
      */
