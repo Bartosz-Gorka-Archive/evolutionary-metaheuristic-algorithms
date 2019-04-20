@@ -1,5 +1,7 @@
 package sample;
 
+import javafx.util.Pair;
+
 import java.util.*;
 
 public class IteratedLocalSearch {
@@ -70,8 +72,10 @@ public class IteratedLocalSearch {
 
             if (this.PERTURBATION_MODE == MODE.SMALL) {
                 smallGroupPerturbation();
-            } else {
+            } else if (this.PERTURBATION_MODE == MODE.BIG_RANDOM) {
                 bigRandomPerturbation(distanceMatrix);
+            } else {
+                bigHeuristicPerturbation(distanceMatrix);
             }
 
             SteepestLocalSolver randomSteepestLocalSolver = new SteepestLocalSolver(this.groups, false, 0, false);
@@ -154,6 +158,63 @@ public class IteratedLocalSearch {
     }
 
     /**
+     * Big perturbation with two stage: destroy and repair.
+     * Destroy based on heuristic
+     */
+    private void bigHeuristicPerturbation(double[][] distanceMatrix) {
+        List<Integer> destroyedPoints = new ArrayList<>();
+        int selectedGroupIndex = 0;
+        double minDistanceValue, distance;
+
+        // Destroy
+        ArrayList<Pair<Pair<Integer, Integer>, Integer>> points = new ArrayList<>();
+        for (Map.Entry<Integer, HashSet<Integer>> entry : this.groups.entrySet()) {
+            for (Integer pointID : entry.getValue()) {
+                distance = 0.0;
+                for (Integer neighborPointID : entry.getValue()) {
+                    distance += distanceMatrix[neighborPointID][pointID];
+                }
+
+                points.add(new Pair<>(new Pair<>(pointID, entry.getKey()), (int) (-distance * 1_000)));
+            }
+        }
+
+        points.sort(Comparator.comparingInt(Pair::getValue));
+        for (Pair<Pair<Integer, Integer>, Integer> pair : points) {
+            System.out.println(pair.getValue());
+        }
+
+        for (int i = 0; i < PERTURBATION_CHANGES_NUMBER; i++) {
+            Pair<Integer, Integer> pair = points.get(i).getKey();
+            this.groups.get(pair.getValue()).remove(pair.getKey());
+            destroyedPoints.add(pair.getKey());
+        }
+
+        // Repair
+        for (Integer pointID : destroyedPoints) {
+            minDistanceValue = Double.MAX_VALUE;
+
+            // Find group with minimum distance between each point in group and current point
+            for (Map.Entry<Integer, HashSet<Integer>> entry : this.groups.entrySet()) {
+                distance = 0.0;
+
+                for (Integer neighborPointID : entry.getValue()) {
+                    distance += distanceMatrix[neighborPointID][pointID];
+                }
+
+                // Check distance is smaller than current stored - if yes => update index
+                if (distance < minDistanceValue) {
+                    minDistanceValue = distance;
+                    selectedGroupIndex = entry.getKey();
+                }
+            }
+
+            // Add point to selected group
+            this.groups.get(selectedGroupIndex).add(pointID);
+        }
+    }
+
+    /**
      * To use it, you should first call `calc` method.
      *
      * @return Prepared best groups
@@ -181,11 +242,12 @@ public class IteratedLocalSearch {
     }
 
     /**
-     * Perturbation mode - supported SMALL, BIG_RANDOM
+     * Perturbation mode - supported SMALL, BIG_RANDOM and BIG_HEURISTIC
      */
     public enum MODE {
         SMALL,
-        BIG_RANDOM
+        BIG_RANDOM,
+        BIG_HEURISTIC
     }
 }
 
