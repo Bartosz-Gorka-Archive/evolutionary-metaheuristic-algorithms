@@ -3,7 +3,13 @@ package sample;
 import java.util.*;
 
 public class IteratedLocalSearch {
+    /**
+     * How many points should be moved in perturbation
+     */
     private int PERTURBATION_CHANGES_NUMBER;
+    /**
+     * Which version of perturbation we should use. Small when True
+     */
     private Boolean isSmallPerturbation;
     /**
      * Assignment to group
@@ -17,30 +23,27 @@ public class IteratedLocalSearch {
     private double bestPenalties;
 
     /**
-     * Time limit for big perturbation calculated by small perturbation algorithm
-     */
-    private long timeLimit;
-
-    /**
      * Iterated local search solver
      *
-     * @param groups Basic assignment to groups
+     * @param groups              Basic assignment to groups
+     * @param isSmallPerturbation Boolean status is small perturbation. When false use big perturbation
      */
     public IteratedLocalSearch(HashMap<Integer, HashSet<Integer>> groups, Boolean isSmallPerturbation) {
         this.bestGroups = new HashMap<>();
-
-        int numberOfpoints = 0;
-        for (Map.Entry<Integer, HashSet<Integer>> entry : groups.entrySet()) {
-            HashSet<Integer> set = new HashSet<>(entry.getValue());
-            numberOfpoints += set.size();
-            this.bestGroups.put(entry.getKey(), set);
-        }
         this.bestPenalties = Double.MAX_VALUE;
         this.isSmallPerturbation = isSmallPerturbation;
+
+        int numberOfPoints = 0;
+        for (Map.Entry<Integer, HashSet<Integer>> entry : groups.entrySet()) {
+            HashSet<Integer> set = new HashSet<>(entry.getValue());
+            numberOfPoints += set.size();
+            this.bestGroups.put(entry.getKey(), set);
+        }
+
         if (isSmallPerturbation) {
-            this.PERTURBATION_CHANGES_NUMBER = (int) (numberOfpoints * 0.02);
+            this.PERTURBATION_CHANGES_NUMBER = (int) (numberOfPoints * 0.02) + 1;
         } else {
-            this.PERTURBATION_CHANGES_NUMBER = (int) (numberOfpoints * 0.3);
+            this.PERTURBATION_CHANGES_NUMBER = (int) (numberOfPoints * 0.3) + 1;
         }
     }
 
@@ -48,12 +51,11 @@ public class IteratedLocalSearch {
      * Run calculations and prepare new assigns
      *
      * @param distanceMatrix Distances between points
+     * @param timeLimit      Time limit in nanoseconds
      */
-    public void run(double[][] distanceMatrix, int numberOfIterations, Long timeLimit) {
+    public void run(double[][] distanceMatrix, Long timeLimit) {
         long startTime = System.nanoTime();
-        int iterationNo = 0;
-        while (true) {
-
+        do {
             //init start groups instance
             this.groups = new HashMap<>();
             for (Map.Entry<Integer, HashSet<Integer>> entry : this.bestGroups.entrySet()) {
@@ -61,9 +63,9 @@ public class IteratedLocalSearch {
                 this.groups.put(entry.getKey(), set);
             }
 
-            if (iterationNo > 0 && this.isSmallPerturbation) {
+            if (this.isSmallPerturbation) {
                 smallGroupPerturbation();
-            } else if (iterationNo > 0) {
+            } else {
                 bigGroupPerturbation(distanceMatrix);
             }
 
@@ -76,15 +78,7 @@ public class IteratedLocalSearch {
                 this.bestPenalties = penalties;
                 this.bestGroups = this.groups;
             }
-
-            if (this.isSmallPerturbation && iterationNo >= numberOfIterations) {
-                this.timeLimit = System.nanoTime() - startTime;
-                break;
-            } else if (!this.isSmallPerturbation && System.nanoTime() - startTime >= timeLimit) {
-                break;
-            }
-            iterationNo++;
-        }
+        } while (System.nanoTime() - startTime < timeLimit);
     }
 
     /**
@@ -170,15 +164,6 @@ public class IteratedLocalSearch {
      */
     public double getBestPenalties() {
         return this.bestPenalties;
-    }
-
-    /**
-     * To use it, you should first execute IteratedLocalSolver with isSmallPerturbation = true.
-     *
-     * @return time limit for big perturbation algorithm
-     */
-    public long getTimeLimit() {
-        return this.timeLimit;
     }
 }
 

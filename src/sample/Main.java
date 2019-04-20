@@ -29,14 +29,14 @@ public class Main extends Application {
     private final static boolean EXECUTE_STEEPEST_CANDIDATE_CACHE = false;
     private final static boolean EXECUTE_STEEPEST_CACHE = false;
     private final static boolean EXECUTE_MSLS = true;
-    private final static boolean EXECUTE_ILS_SMALL_PERTUBATION = true;
-    private final static boolean EXECUTE_ILS_BIG_PERTUBATION = true;
+    private final static boolean EXECUTE_ILS_SMALL_PERTURBATION = true;
+    private final static boolean EXECUTE_ILS_BIG_PERTURBATION = true;
     /**
      * How many candidates we chose in steepest naive candidates algorithm
      */
     private final static int CANDIDATES_NUMBER = 10;
-    private final static int MSLS_ITERATIONS = 1;
-    private final static int MSLS_LS_ITERATIONS = 2;
+    private final static int MSLS_ITERATIONS = 10;
+    private final static int MSLS_LS_ITERATIONS = 100;
     /**
      * Mode - Greedy when 0 else Steepest
      */
@@ -98,10 +98,10 @@ public class Main extends Application {
         HashSet<ArrayList<PointsPath>> bestNaiveSteepestCandidateCacheGroupsConnections = new HashSet<>();
         HashSet<ArrayList<PointsPath>> bestMSLSGroupsMST = new HashSet<>();
         HashSet<ArrayList<PointsPath>> bestMSLSGroupsConnections = new HashSet<>();
-        HashSet<ArrayList<PointsPath>> bestILSSmallPertubationGroupsMST = new HashSet<>();
-        HashSet<ArrayList<PointsPath>> bestILSSmallPertubationGroupsConnections = new HashSet<>();
-        HashSet<ArrayList<PointsPath>> bestILSBigPertubationGroupsMST = new HashSet<>();
-        HashSet<ArrayList<PointsPath>> bestILSBigPertubationGroupsConnections = new HashSet<>();
+        HashSet<ArrayList<PointsPath>> bestILSSmallPerturbationGroupsMST = new HashSet<>();
+        HashSet<ArrayList<PointsPath>> bestILSSmallPerturbationGroupsConnections = new HashSet<>();
+        HashSet<ArrayList<PointsPath>> bestILSBigPerturbationGroupsMST = new HashSet<>();
+        HashSet<ArrayList<PointsPath>> bestILSBigPerturbationGroupsConnections = new HashSet<>();
 
         double[] naiveGreedyResults = new double[TESTS_NUMBER], naiveSteepestResults = new double[TESTS_NUMBER],
                 randomGreedyResults = new double[TESTS_NUMBER], randomSteepestResults = new double[TESTS_NUMBER],
@@ -111,8 +111,8 @@ public class Main extends Application {
                 randomGreedyTimes = new double[TESTS_NUMBER], randomSteepestTimes = new double[TESTS_NUMBER],
                 naiveSteepestCandidateTimes = new double[TESTS_NUMBER], naiveSteepestCacheTimes = new double[TESTS_NUMBER],
                 naiveSteepestCandidateCacheTimes = new double[TESTS_NUMBER],
-                ILSSmallPertubationTimes = new double[TESTS_NUMBER], ILSSmallPertubationResults = new double[TESTS_NUMBER],
-                ILSBigPertubationTimes = new double[TESTS_NUMBER], ILSBigPertubationResults = new double[TESTS_NUMBER];
+                ILSSmallPerturbationTimes = new double[TESTS_NUMBER], ILSSmallPerturbationResults = new double[TESTS_NUMBER],
+                ILSBigPerturbationTimes = new double[TESTS_NUMBER], ILSBigPerturbationResults = new double[TESTS_NUMBER];
 
         double[][] MSLSTimes = new double[TESTS_NUMBER][MSLS_ITERATIONS], MSLSResults = new double[TESTS_NUMBER][MSLS_ITERATIONS];
 
@@ -120,7 +120,7 @@ public class Main extends Application {
                 bestNaiveSteepestResult = Double.MAX_VALUE, bestRandomSteepestResult = Double.MAX_VALUE,
                 bestNaiveSteepestCandidateResult = Double.MAX_VALUE, bestNaiveSteepestCacheResult = Double.MAX_VALUE,
                 bestNaiveSteepestCandidateCacheResult = Double.MAX_VALUE, bestMSLSResult = Double.MAX_VALUE,
-                bestILSSmallPertubationResult = Double.MAX_VALUE, bestILSBigPertubationResult = Double.MAX_VALUE;
+                bestILSSmallPerturbationResult = Double.MAX_VALUE, bestILSBigPerturbationResult = Double.MAX_VALUE;
 
         // Using for statistics
         long startTime;
@@ -255,8 +255,11 @@ public class Main extends Application {
             /*
              * MSLS
              */
+            long iterated_local_search_time_limit = (long) (30.0 * 1_000_000_000.0);
             if (EXECUTE_MSLS) {
+                iterated_local_search_time_limit = System.nanoTime();
                 for (int i = 0; i < MSLS_ITERATIONS; i++) {
+                    System.out.println("MSLS Iteration " + i);
                     startTime = System.nanoTime();
                     MSLS msls = new MSLS(MSLS_MODE, MSLS_LS_ITERATIONS, startIndexesList, distanceMatrix, coordinates);
                     msls.run();
@@ -270,37 +273,37 @@ public class Main extends Application {
 
                     MSLSTimes[iteration][i] = System.nanoTime() - startTime;
                 }
+                iterated_local_search_time_limit = System.nanoTime() - iterated_local_search_time_limit;
             }
             /*
-             * Iterated Local Search with small pertubation
+             * Iterated Local Search with small perturbation
              */
-            if (EXECUTE_ILS_SMALL_PERTUBATION) {
+            if (EXECUTE_ILS_SMALL_PERTURBATION) {
                 startTime = System.nanoTime();
                 IteratedLocalSearch iteratedLocalSolver = new IteratedLocalSearch(randomInstances, true);
-                iteratedLocalSolver.run(distanceMatrix, 50, 0L);
-                ILSSmallPertubationResults[iteration] = iteratedLocalSolver.getBestPenalties();
-                if (iteratedLocalSolver.getBestPenalties() < bestILSSmallPertubationResult) {
-                    bestILSSmallPertubationResult = iteratedLocalSolver.getBestPenalties();
-                    bestILSSmallPertubationGroupsMST = castLocalSearchToMSTGraph(iteratedLocalSolver.getBestGroups(), distanceMatrix);
-                    bestILSSmallPertubationGroupsConnections = castLocalSearchToConnectionGraph(iteratedLocalSolver.getBestGroups(), distanceMatrix);
-//                    bigPertubationTimeLimit = iteratedLocalSolver.getTimeLimit();
+                iteratedLocalSolver.run(distanceMatrix, iterated_local_search_time_limit);
+                ILSSmallPerturbationResults[iteration] = iteratedLocalSolver.getBestPenalties();
+                if (iteratedLocalSolver.getBestPenalties() < bestILSSmallPerturbationResult) {
+                    bestILSSmallPerturbationResult = iteratedLocalSolver.getBestPenalties();
+                    bestILSSmallPerturbationGroupsMST = castLocalSearchToMSTGraph(iteratedLocalSolver.getBestGroups(), distanceMatrix);
+                    bestILSSmallPerturbationGroupsConnections = castLocalSearchToConnectionGraph(iteratedLocalSolver.getBestGroups(), distanceMatrix);
                 }
-                ILSSmallPertubationTimes[iteration] = System.nanoTime() - startTime;
+                ILSSmallPerturbationTimes[iteration] = System.nanoTime() - startTime;
             }
             /*
-             * Iterated Local Search with big pertubation
+             * Iterated Local Search with big perturbation
              */
-            if (EXECUTE_ILS_BIG_PERTUBATION) {
+            if (EXECUTE_ILS_BIG_PERTURBATION) {
                 startTime = System.nanoTime();
                 IteratedLocalSearch iteratedLocalSolver = new IteratedLocalSearch(randomInstances, false);
-                iteratedLocalSolver.run(distanceMatrix, 50, 0L);
-                ILSBigPertubationResults[iteration] = iteratedLocalSolver.getBestPenalties();
-                if (iteratedLocalSolver.getBestPenalties() < bestILSBigPertubationResult) {
-                    bestILSBigPertubationResult = iteratedLocalSolver.getBestPenalties();
-                    bestILSBigPertubationGroupsMST = castLocalSearchToMSTGraph(iteratedLocalSolver.getBestGroups(), distanceMatrix);
-                    bestILSBigPertubationGroupsConnections = castLocalSearchToConnectionGraph(iteratedLocalSolver.getBestGroups(), distanceMatrix);
+                iteratedLocalSolver.run(distanceMatrix, iterated_local_search_time_limit);
+                ILSBigPerturbationResults[iteration] = iteratedLocalSolver.getBestPenalties();
+                if (iteratedLocalSolver.getBestPenalties() < bestILSBigPerturbationResult) {
+                    bestILSBigPerturbationResult = iteratedLocalSolver.getBestPenalties();
+                    bestILSBigPerturbationGroupsMST = castLocalSearchToMSTGraph(iteratedLocalSolver.getBestGroups(), distanceMatrix);
+                    bestILSBigPerturbationGroupsConnections = castLocalSearchToConnectionGraph(iteratedLocalSolver.getBestGroups(), distanceMatrix);
                 }
-                ILSBigPertubationTimes[iteration] = System.nanoTime() - startTime;
+                ILSBigPerturbationTimes[iteration] = System.nanoTime() - startTime;
             }
         }
 
@@ -353,16 +356,16 @@ public class Main extends Application {
             new Drawer().drawInputInstance(coordinates, bestMSLSGroupsConnections, "MSLS", false, true);
         }
 
-        if (EXECUTE_ILS_SMALL_PERTUBATION) {
-            new Drawer().drawInputInstance(coordinates, bestILSSmallPertubationGroupsMST, "ILS small pertubation", true, true);
-            new Drawer().drawInputInstance(coordinates, bestILSSmallPertubationGroupsMST, "ILS small pertubation", true, false);
-            new Drawer().drawInputInstance(coordinates, bestILSSmallPertubationGroupsConnections, "ILS small pertubation", false, true);
+        if (EXECUTE_ILS_SMALL_PERTURBATION) {
+            new Drawer().drawInputInstance(coordinates, bestILSSmallPerturbationGroupsMST, "ILS small perturbation", true, true);
+            new Drawer().drawInputInstance(coordinates, bestILSSmallPerturbationGroupsMST, "ILS small perturbation", true, false);
+            new Drawer().drawInputInstance(coordinates, bestILSSmallPerturbationGroupsConnections, "ILS small perturbation", false, true);
         }
 
-        if (EXECUTE_ILS_BIG_PERTUBATION) {
-            new Drawer().drawInputInstance(coordinates, bestILSBigPertubationGroupsMST, "ILS big pertubation", true, true);
-            new Drawer().drawInputInstance(coordinates, bestILSBigPertubationGroupsMST, "ILS big pertubation", true, false);
-            new Drawer().drawInputInstance(coordinates, bestILSBigPertubationGroupsConnections, "ILS big pertubation", false, true);
+        if (EXECUTE_ILS_BIG_PERTURBATION) {
+            new Drawer().drawInputInstance(coordinates, bestILSBigPerturbationGroupsMST, "ILS big perturbation", true, true);
+            new Drawer().drawInputInstance(coordinates, bestILSBigPerturbationGroupsMST, "ILS big perturbation", true, false);
+            new Drawer().drawInputInstance(coordinates, bestILSBigPerturbationGroupsConnections, "ILS big perturbation", false, true);
         }
 
         if (SHOW_STATISTICS) {
@@ -382,10 +385,10 @@ public class Main extends Application {
                 System.out.println("Min result for naive steepest candidate + cache = " + bestNaiveSteepestCandidateCacheResult);
             if (EXECUTE_MSLS)
                 System.out.println("Min result for MSLS = " + bestMSLSResult);
-            if (EXECUTE_ILS_SMALL_PERTUBATION)
-                System.out.println("Min result for ILS small perturbation = " + bestILSSmallPertubationResult);
-            if (EXECUTE_ILS_BIG_PERTUBATION)
-                System.out.println("Min result for ILS big perturbation = " + bestILSBigPertubationResult);
+            if (EXECUTE_ILS_SMALL_PERTURBATION)
+                System.out.println("Min result for ILS small perturbation = " + bestILSSmallPerturbationResult);
+            if (EXECUTE_ILS_BIG_PERTURBATION)
+                System.out.println("Min result for ILS big perturbation = " + bestILSBigPerturbationResult);
 
             if (EXECUTE_GREEDY_NAIVE)
                 System.out.println("Mean result for naive greedy = " + Arrays.stream(naiveGreedyResults).average().getAsDouble());
@@ -410,10 +413,10 @@ public class Main extends Application {
                 }
                 System.out.println("Mean result for MSLS = " + Arrays.stream(mean).average().getAsDouble());
             }
-            if (EXECUTE_ILS_SMALL_PERTUBATION)
-                System.out.println("Mean result for ILS small perturbation = " + Arrays.stream(ILSSmallPertubationResults).average().getAsDouble());
-            if (EXECUTE_ILS_BIG_PERTUBATION)
-                System.out.println("Mean result for ILS big perturbation = " + Arrays.stream(ILSBigPertubationResults).average().getAsDouble());
+            if (EXECUTE_ILS_SMALL_PERTURBATION)
+                System.out.println("Mean result for ILS small perturbation = " + Arrays.stream(ILSSmallPerturbationResults).average().getAsDouble());
+            if (EXECUTE_ILS_BIG_PERTURBATION)
+                System.out.println("Mean result for ILS big perturbation = " + Arrays.stream(ILSBigPerturbationResults).average().getAsDouble());
 
             if (EXECUTE_GREEDY_NAIVE)
                 System.out.println("Max result for naive greedy = " + Arrays.stream(naiveGreedyResults).max().getAsDouble());
@@ -431,10 +434,10 @@ public class Main extends Application {
                 System.out.println("Max result for naive steepest candidate + cache = " + Arrays.stream(naiveSteepestCandidateCacheResults).max().getAsDouble());
             if (EXECUTE_MSLS)
                 System.out.println("Max result for MSLS = " + Arrays.stream(MSLSResults).flatMapToDouble(Arrays::stream).max().getAsDouble());
-            if (EXECUTE_ILS_SMALL_PERTUBATION)
-                System.out.println("Max result for ILS small perturbation = " + Arrays.stream(ILSSmallPertubationResults).max().getAsDouble());
-            if (EXECUTE_ILS_BIG_PERTUBATION)
-                System.out.println("Max result for ILS big perturbation = " + Arrays.stream(ILSBigPertubationResults).max().getAsDouble());
+            if (EXECUTE_ILS_SMALL_PERTURBATION)
+                System.out.println("Max result for ILS small perturbation = " + Arrays.stream(ILSSmallPerturbationResults).max().getAsDouble());
+            if (EXECUTE_ILS_BIG_PERTURBATION)
+                System.out.println("Max result for ILS big perturbation = " + Arrays.stream(ILSBigPerturbationResults).max().getAsDouble());
 
             System.out.println("TIMING:");
             if (EXECUTE_GREEDY_NAIVE)
@@ -453,10 +456,10 @@ public class Main extends Application {
                 System.out.println("Min time for naive steepest candidate + cache = " + Arrays.stream(naiveSteepestCandidateCacheTimes).min().getAsDouble() / 1_000_000_000.0);
             if (EXECUTE_MSLS)
                 System.out.println("Min time for MSLS = " + Arrays.stream(MSLSTimes).flatMapToDouble(Arrays::stream).min().getAsDouble() / 1_000_000_000.0);
-            if (EXECUTE_ILS_SMALL_PERTUBATION)
-                System.out.println("Min time for ILS small perturbation = " + Arrays.stream(ILSSmallPertubationTimes).min().getAsDouble() / 1_000_000_000.0);
-            if (EXECUTE_ILS_BIG_PERTUBATION)
-                System.out.println("Min time for ILS big perturbation = " + Arrays.stream(ILSBigPertubationTimes).min().getAsDouble() / 1_000_000_000.0);
+            if (EXECUTE_ILS_SMALL_PERTURBATION)
+                System.out.println("Min time for ILS small perturbation = " + Arrays.stream(ILSSmallPerturbationTimes).min().getAsDouble() / 1_000_000_000.0);
+            if (EXECUTE_ILS_BIG_PERTURBATION)
+                System.out.println("Min time for ILS big perturbation = " + Arrays.stream(ILSBigPerturbationTimes).min().getAsDouble() / 1_000_000_000.0);
 
             if (EXECUTE_GREEDY_NAIVE)
                 System.out.println("Mean time for naive greedy = " + Arrays.stream(naiveGreedyTimes).average().getAsDouble() / 1_000_000_000.0);
@@ -481,10 +484,10 @@ public class Main extends Application {
                 }
                 System.out.println("Mean time for MSLS = " + Arrays.stream(mean).average().getAsDouble() / 1_000_000_000.0);
             }
-            if (EXECUTE_ILS_SMALL_PERTUBATION)
-                System.out.println("Mean time for ILS small perturbation = " + Arrays.stream(ILSSmallPertubationTimes).average().getAsDouble() / 1_000_000_000.0);
-            if (EXECUTE_ILS_BIG_PERTUBATION)
-                System.out.println("Mean time for ILS big perturbation = " + Arrays.stream(ILSBigPertubationTimes).average().getAsDouble() / 1_000_000_000.0);
+            if (EXECUTE_ILS_SMALL_PERTURBATION)
+                System.out.println("Mean time for ILS small perturbation = " + Arrays.stream(ILSSmallPerturbationTimes).average().getAsDouble() / 1_000_000_000.0);
+            if (EXECUTE_ILS_BIG_PERTURBATION)
+                System.out.println("Mean time for ILS big perturbation = " + Arrays.stream(ILSBigPerturbationTimes).average().getAsDouble() / 1_000_000_000.0);
 
 
             if (EXECUTE_GREEDY_NAIVE)
@@ -503,10 +506,10 @@ public class Main extends Application {
                 System.out.println("Max time for naive steepest candidate + cache = " + Arrays.stream(naiveSteepestCandidateCacheTimes).max().getAsDouble() / 1_000_000_000.0);
             if (EXECUTE_MSLS)
                 System.out.println("Max time for MSLS = " + Arrays.stream(MSLSTimes).flatMapToDouble(Arrays::stream).max().getAsDouble() / 1_000_000_000.0);
-            if (EXECUTE_ILS_SMALL_PERTUBATION)
-                System.out.println("Max time for ILS small perturbation = " + Arrays.stream(ILSSmallPertubationTimes).max().getAsDouble() / 1_000_000_000.0);
-            if (EXECUTE_ILS_BIG_PERTUBATION)
-                System.out.println("Max time for ILS big perturbation = " + Arrays.stream(ILSBigPertubationTimes).max().getAsDouble() / 1_000_000_000.0);
+            if (EXECUTE_ILS_SMALL_PERTURBATION)
+                System.out.println("Max time for ILS small perturbation = " + Arrays.stream(ILSSmallPerturbationTimes).max().getAsDouble() / 1_000_000_000.0);
+            if (EXECUTE_ILS_BIG_PERTURBATION)
+                System.out.println("Max time for ILS big perturbation = " + Arrays.stream(ILSBigPerturbationTimes).max().getAsDouble() / 1_000_000_000.0);
         }
     }
 
