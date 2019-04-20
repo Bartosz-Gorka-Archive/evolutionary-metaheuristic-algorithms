@@ -102,6 +102,8 @@ public class Main extends Application {
         HashSet<ArrayList<PointsPath>> bestILSSmallPerturbationGroupsConnections = new HashSet<>();
         HashSet<ArrayList<PointsPath>> bestILSBigPerturbationGroupsMST = new HashSet<>();
         HashSet<ArrayList<PointsPath>> bestILSBigPerturbationGroupsConnections = new HashSet<>();
+        HashSet<ArrayList<PointsPath>> bestILSBigHeuristicPerturbationGroupsMST = new HashSet<>();
+        HashSet<ArrayList<PointsPath>> bestILSBigHeuristicPerturbationGroupsConnections = new HashSet<>();
 
         double[] naiveGreedyResults = new double[TESTS_NUMBER], naiveSteepestResults = new double[TESTS_NUMBER],
                 randomGreedyResults = new double[TESTS_NUMBER], randomSteepestResults = new double[TESTS_NUMBER],
@@ -112,7 +114,8 @@ public class Main extends Application {
                 naiveSteepestCandidateTimes = new double[TESTS_NUMBER], naiveSteepestCacheTimes = new double[TESTS_NUMBER],
                 naiveSteepestCandidateCacheTimes = new double[TESTS_NUMBER],
                 ILSSmallPerturbationTimes = new double[TESTS_NUMBER], ILSSmallPerturbationResults = new double[TESTS_NUMBER],
-                ILSBigPerturbationTimes = new double[TESTS_NUMBER], ILSBigPerturbationResults = new double[TESTS_NUMBER];
+                ILSBigPerturbationTimes = new double[TESTS_NUMBER], ILSBigPerturbationResults = new double[TESTS_NUMBER],
+                ILSBigHeuristicPerturbationTimes = new double[TESTS_NUMBER], ILSBigHeuristicPerturbationResults = new double[TESTS_NUMBER];
 
         double[][] MSLSTimes = new double[TESTS_NUMBER][MSLS_ITERATIONS], MSLSResults = new double[TESTS_NUMBER][MSLS_ITERATIONS];
 
@@ -120,7 +123,8 @@ public class Main extends Application {
                 bestNaiveSteepestResult = Double.MAX_VALUE, bestRandomSteepestResult = Double.MAX_VALUE,
                 bestNaiveSteepestCandidateResult = Double.MAX_VALUE, bestNaiveSteepestCacheResult = Double.MAX_VALUE,
                 bestNaiveSteepestCandidateCacheResult = Double.MAX_VALUE, bestMSLSResult = Double.MAX_VALUE,
-                bestILSSmallPerturbationResult = Double.MAX_VALUE, bestILSBigPerturbationResult = Double.MAX_VALUE;
+                bestILSSmallPerturbationResult = Double.MAX_VALUE, bestILSBigPerturbationResult = Double.MAX_VALUE,
+                bestILSBigHeuristicPerturbationResult = Double.MAX_VALUE;
 
         // Using for statistics
         long startTime;
@@ -291,7 +295,7 @@ public class Main extends Application {
                 ILSSmallPerturbationTimes[iteration] = System.nanoTime() - startTime;
             }
             /*
-             * Iterated Local Search with big perturbation
+             * Iterated Local Search with big random perturbation
              */
             if (EXECUTE_ILS_BIG_PERTURBATION) {
                 startTime = System.nanoTime();
@@ -304,6 +308,21 @@ public class Main extends Application {
                     bestILSBigPerturbationGroupsConnections = castLocalSearchToConnectionGraph(iteratedLocalSolver.getBestGroups(), distanceMatrix);
                 }
                 ILSBigPerturbationTimes[iteration] = System.nanoTime() - startTime;
+            }
+            /*
+             * Iterated Local Search with big heuristic perturbation
+             */
+            if (EXECUTE_ILS_BIG_PERTURBATION) {
+                startTime = System.nanoTime();
+                IteratedLocalSearch iteratedLocalSolver = new IteratedLocalSearch(randomInstances, IteratedLocalSearch.MODE.BIG_HEURISTIC);
+                iteratedLocalSolver.run(distanceMatrix, iterated_local_search_time_limit);
+                ILSBigHeuristicPerturbationResults[iteration] = iteratedLocalSolver.getBestPenalties();
+                if (iteratedLocalSolver.getBestPenalties() < bestILSBigHeuristicPerturbationResult) {
+                    bestILSBigHeuristicPerturbationResult = iteratedLocalSolver.getBestPenalties();
+                    bestILSBigHeuristicPerturbationGroupsMST = castLocalSearchToMSTGraph(iteratedLocalSolver.getBestGroups(), distanceMatrix);
+                    bestILSBigHeuristicPerturbationGroupsConnections = castLocalSearchToConnectionGraph(iteratedLocalSolver.getBestGroups(), distanceMatrix);
+                }
+                ILSBigHeuristicPerturbationTimes[iteration] = System.nanoTime() - startTime;
             }
         }
 
@@ -363,9 +382,15 @@ public class Main extends Application {
         }
 
         if (EXECUTE_ILS_BIG_PERTURBATION) {
-            new Drawer().drawInputInstance(coordinates, bestILSBigPerturbationGroupsMST, "ILS big perturbation", true, true);
-            new Drawer().drawInputInstance(coordinates, bestILSBigPerturbationGroupsMST, "ILS big perturbation", true, false);
-            new Drawer().drawInputInstance(coordinates, bestILSBigPerturbationGroupsConnections, "ILS big perturbation", false, true);
+            new Drawer().drawInputInstance(coordinates, bestILSBigPerturbationGroupsMST, "ILS big random perturbation", true, true);
+            new Drawer().drawInputInstance(coordinates, bestILSBigPerturbationGroupsMST, "ILS big random perturbation", true, false);
+            new Drawer().drawInputInstance(coordinates, bestILSBigPerturbationGroupsConnections, "ILS big random perturbation", false, true);
+        }
+
+        if (EXECUTE_ILS_BIG_PERTURBATION) {
+            new Drawer().drawInputInstance(coordinates, bestILSBigHeuristicPerturbationGroupsMST, "ILS big heuristic perturbation", true, true);
+            new Drawer().drawInputInstance(coordinates, bestILSBigHeuristicPerturbationGroupsMST, "ILS big heuristic perturbation", true, false);
+            new Drawer().drawInputInstance(coordinates, bestILSBigHeuristicPerturbationGroupsConnections, "ILS big heuristic perturbation", false, true);
         }
 
         if (SHOW_STATISTICS) {
@@ -388,7 +413,9 @@ public class Main extends Application {
             if (EXECUTE_ILS_SMALL_PERTURBATION)
                 System.out.println("Min result for ILS small perturbation = " + bestILSSmallPerturbationResult);
             if (EXECUTE_ILS_BIG_PERTURBATION)
-                System.out.println("Min result for ILS big perturbation = " + bestILSBigPerturbationResult);
+                System.out.println("Min result for ILS big random perturbation = " + bestILSBigPerturbationResult);
+            if (EXECUTE_ILS_BIG_PERTURBATION)
+                System.out.println("Min result for ILS big heuristic perturbation = " + bestILSBigHeuristicPerturbationResult);
 
             if (EXECUTE_GREEDY_NAIVE)
                 System.out.println("Mean result for naive greedy = " + Arrays.stream(naiveGreedyResults).average().getAsDouble());
@@ -416,7 +443,9 @@ public class Main extends Application {
             if (EXECUTE_ILS_SMALL_PERTURBATION)
                 System.out.println("Mean result for ILS small perturbation = " + Arrays.stream(ILSSmallPerturbationResults).average().getAsDouble());
             if (EXECUTE_ILS_BIG_PERTURBATION)
-                System.out.println("Mean result for ILS big perturbation = " + Arrays.stream(ILSBigPerturbationResults).average().getAsDouble());
+                System.out.println("Mean result for ILS big random perturbation = " + Arrays.stream(ILSBigPerturbationResults).average().getAsDouble());
+            if (EXECUTE_ILS_BIG_PERTURBATION)
+                System.out.println("Mean result for ILS big heuristic perturbation = " + Arrays.stream(ILSBigHeuristicPerturbationResults).average().getAsDouble());
 
             if (EXECUTE_GREEDY_NAIVE)
                 System.out.println("Max result for naive greedy = " + Arrays.stream(naiveGreedyResults).max().getAsDouble());
@@ -437,7 +466,9 @@ public class Main extends Application {
             if (EXECUTE_ILS_SMALL_PERTURBATION)
                 System.out.println("Max result for ILS small perturbation = " + Arrays.stream(ILSSmallPerturbationResults).max().getAsDouble());
             if (EXECUTE_ILS_BIG_PERTURBATION)
-                System.out.println("Max result for ILS big perturbation = " + Arrays.stream(ILSBigPerturbationResults).max().getAsDouble());
+                System.out.println("Max result for ILS big random perturbation = " + Arrays.stream(ILSBigPerturbationResults).max().getAsDouble());
+            if (EXECUTE_ILS_BIG_PERTURBATION)
+                System.out.println("Max result for ILS big heuristic perturbation = " + Arrays.stream(ILSBigHeuristicPerturbationResults).max().getAsDouble());
 
             System.out.println("TIMING:");
             if (EXECUTE_GREEDY_NAIVE)
@@ -459,7 +490,9 @@ public class Main extends Application {
             if (EXECUTE_ILS_SMALL_PERTURBATION)
                 System.out.println("Min time for ILS small perturbation = " + Arrays.stream(ILSSmallPerturbationTimes).min().getAsDouble() / 1_000_000_000.0);
             if (EXECUTE_ILS_BIG_PERTURBATION)
-                System.out.println("Min time for ILS big perturbation = " + Arrays.stream(ILSBigPerturbationTimes).min().getAsDouble() / 1_000_000_000.0);
+                System.out.println("Min time for ILS big random perturbation = " + Arrays.stream(ILSBigPerturbationTimes).min().getAsDouble() / 1_000_000_000.0);
+            if (EXECUTE_ILS_BIG_PERTURBATION)
+                System.out.println("Min time for ILS big heuristic perturbation = " + Arrays.stream(ILSBigHeuristicPerturbationTimes).min().getAsDouble() / 1_000_000_000.0);
 
             if (EXECUTE_GREEDY_NAIVE)
                 System.out.println("Mean time for naive greedy = " + Arrays.stream(naiveGreedyTimes).average().getAsDouble() / 1_000_000_000.0);
@@ -487,7 +520,9 @@ public class Main extends Application {
             if (EXECUTE_ILS_SMALL_PERTURBATION)
                 System.out.println("Mean time for ILS small perturbation = " + Arrays.stream(ILSSmallPerturbationTimes).average().getAsDouble() / 1_000_000_000.0);
             if (EXECUTE_ILS_BIG_PERTURBATION)
-                System.out.println("Mean time for ILS big perturbation = " + Arrays.stream(ILSBigPerturbationTimes).average().getAsDouble() / 1_000_000_000.0);
+                System.out.println("Mean time for ILS big random perturbation = " + Arrays.stream(ILSBigPerturbationTimes).average().getAsDouble() / 1_000_000_000.0);
+            if (EXECUTE_ILS_BIG_PERTURBATION)
+                System.out.println("Mean time for ILS big heuristic perturbation = " + Arrays.stream(ILSBigHeuristicPerturbationTimes).average().getAsDouble() / 1_000_000_000.0);
 
 
             if (EXECUTE_GREEDY_NAIVE)
@@ -509,7 +544,9 @@ public class Main extends Application {
             if (EXECUTE_ILS_SMALL_PERTURBATION)
                 System.out.println("Max time for ILS small perturbation = " + Arrays.stream(ILSSmallPerturbationTimes).max().getAsDouble() / 1_000_000_000.0);
             if (EXECUTE_ILS_BIG_PERTURBATION)
-                System.out.println("Max time for ILS big perturbation = " + Arrays.stream(ILSBigPerturbationTimes).max().getAsDouble() / 1_000_000_000.0);
+                System.out.println("Max time for ILS big random perturbation = " + Arrays.stream(ILSBigPerturbationTimes).max().getAsDouble() / 1_000_000_000.0);
+            if (EXECUTE_ILS_BIG_PERTURBATION)
+                System.out.println("Max time for ILS big heuristic perturbation = " + Arrays.stream(ILSBigHeuristicPerturbationTimes).max().getAsDouble() / 1_000_000_000.0);
         }
     }
 
