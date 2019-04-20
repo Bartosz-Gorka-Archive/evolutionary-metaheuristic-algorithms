@@ -180,9 +180,6 @@ public class IteratedLocalSearch {
         }
 
         points.sort(Comparator.comparingInt(Pair::getValue));
-        for (Pair<Pair<Integer, Integer>, Integer> pair : points) {
-            System.out.println(pair.getValue());
-        }
 
         for (int i = 0; i < PERTURBATION_CHANGES_NUMBER; i++) {
             Pair<Integer, Integer> pair = points.get(i).getKey();
