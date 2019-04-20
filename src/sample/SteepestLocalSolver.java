@@ -2,7 +2,7 @@ package sample;
 
 import java.util.*;
 
-public class SteepestLocalSolver {
+public class SteepestLocalSolver implements SolverInterface {
     private final boolean useCache;
     /**
      * Assignment to group
