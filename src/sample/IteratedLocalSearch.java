@@ -110,39 +110,36 @@ public class IteratedLocalSearch {
     }
 
     /**
-     * Execute after assign global best groups to groups usung in single iteration when isSmallPerturbation == false
+     * Big perturbation with two stage: destroy and repair
      */
     private void bigRandomPerturbation(double[][] distanceMatrix) {
         List<Integer> destroyedPoints = new ArrayList<>();
         Random rand = new Random();
-        int randomGroupId;
+        int randomGroupId, selectedGroupIndex = 0;
+        double minDistanceValue, distance;
 
-        //destroy
+        // Destroy
         for (int i = 0; i < PERTURBATION_CHANGES_NUMBER; i++) {
             do {
                 randomGroupId = rand.nextInt(this.groups.size());
-            } while (this.groups.get(randomGroupId).size() == 0);
+            } while (this.groups.get(randomGroupId).size() == 1);
 
             Integer pointID = this.groups.get(randomGroupId).iterator().next();
             this.groups.get(randomGroupId).remove(pointID);
             destroyedPoints.add(pointID);
         }
 
-        //repair
-        for (Integer point : destroyedPoints) {
-            int selectedGroupIndex;
-            do {
-                selectedGroupIndex = this.groups.entrySet().iterator().next().getKey();
-            } while (this.groups.get(selectedGroupIndex).size() == 0);
-            double minDistanceValue = Double.MAX_VALUE;
+        // Repair
+        for (Integer pointID : destroyedPoints) {
+            minDistanceValue = Double.MAX_VALUE;
 
+            // Find group with minimum average distance between each point in group and current point
             for (Map.Entry<Integer, HashSet<Integer>> entry : this.groups.entrySet()) {
-                if (entry.getValue().size() == 0) {
-                    continue;
+                distance = 0.0;
+
+                for (Integer neighborPointID : entry.getValue()) {
+                    distance += distanceMatrix[neighborPointID][pointID];
                 }
-                int pointIdFromGroup = entry.getValue().iterator().next();
-                // Get distance from array
-                double distance = distanceMatrix[pointIdFromGroup][point];
 
                 // Check distance is smaller than current stored - if yes => update index
                 if (distance < minDistanceValue) {
@@ -150,8 +147,9 @@ public class IteratedLocalSearch {
                     selectedGroupIndex = entry.getKey();
                 }
             }
+
             // Add point to selected group
-            this.groups.get(selectedGroupIndex).add(point);
+            this.groups.get(selectedGroupIndex).add(pointID);
         }
     }
 
