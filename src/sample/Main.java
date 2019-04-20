@@ -280,7 +280,7 @@ public class Main extends Application {
              */
             if (EXECUTE_ILS_SMALL_PERTURBATION) {
                 startTime = System.nanoTime();
-                IteratedLocalSearch iteratedLocalSolver = new IteratedLocalSearch(randomInstances, true);
+                IteratedLocalSearch iteratedLocalSolver = new IteratedLocalSearch(randomInstances, IteratedLocalSearch.MODE.SMALL);
                 iteratedLocalSolver.run(distanceMatrix, iterated_local_search_time_limit);
                 ILSSmallPerturbationResults[iteration] = iteratedLocalSolver.getBestPenalties();
                 if (iteratedLocalSolver.getBestPenalties() < bestILSSmallPerturbationResult) {
@@ -295,7 +295,7 @@ public class Main extends Application {
              */
             if (EXECUTE_ILS_BIG_PERTURBATION) {
                 startTime = System.nanoTime();
-                IteratedLocalSearch iteratedLocalSolver = new IteratedLocalSearch(randomInstances, false);
+                IteratedLocalSearch iteratedLocalSolver = new IteratedLocalSearch(randomInstances, IteratedLocalSearch.MODE.BIG_RANDOM);
                 iteratedLocalSolver.run(distanceMatrix, iterated_local_search_time_limit);
                 ILSBigPerturbationResults[iteration] = iteratedLocalSolver.getBestPenalties();
                 if (iteratedLocalSolver.getBestPenalties() < bestILSBigPerturbationResult) {

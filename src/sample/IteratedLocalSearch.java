@@ -14,13 +14,12 @@ public class IteratedLocalSearch {
     /**
      * Which version of perturbation we should use. Small when True
      */
-    private Boolean isSmallPerturbation;
+    private MODE PERTURBATION_MODE;
     /**
      * Assignment to group
      */
     private HashMap<Integer, HashSet<Integer>> groups;
     private HashMap<Integer, HashSet<Integer>> bestGroups;
-
     /**
      * Mean distance between connections
      */
@@ -29,13 +28,13 @@ public class IteratedLocalSearch {
     /**
      * Iterated local search solver
      *
-     * @param groups              Basic assignment to groups
-     * @param isSmallPerturbation Boolean status is small perturbation. When false use big perturbation
+     * @param groups           Basic assignment to groups
+     * @param perturbationMode Perturbation mode
      */
-    public IteratedLocalSearch(HashMap<Integer, HashSet<Integer>> groups, Boolean isSmallPerturbation) {
+    public IteratedLocalSearch(HashMap<Integer, HashSet<Integer>> groups, MODE perturbationMode) {
         this.bestGroups = new HashMap<>();
         this.bestPenalties = Double.MAX_VALUE;
-        this.isSmallPerturbation = isSmallPerturbation;
+        this.PERTURBATION_MODE = perturbationMode;
         this.iterationTimes = new ArrayList<>();
 
         int numberOfPoints = 0;
@@ -45,7 +44,7 @@ public class IteratedLocalSearch {
             this.bestGroups.put(entry.getKey(), set);
         }
 
-        if (isSmallPerturbation) {
+        if (this.PERTURBATION_MODE == MODE.SMALL) {
             this.PERTURBATION_CHANGES_NUMBER = (int) (numberOfPoints * 0.02) + 1;
         } else {
             this.PERTURBATION_CHANGES_NUMBER = (int) (numberOfPoints * 0.3) + 1;
@@ -69,10 +68,10 @@ public class IteratedLocalSearch {
                 this.groups.put(entry.getKey(), set);
             }
 
-            if (this.isSmallPerturbation) {
+            if (this.PERTURBATION_MODE == MODE.SMALL) {
                 smallGroupPerturbation();
             } else {
-                bigGroupPerturbation(distanceMatrix);
+                bigRandomPerturbation(distanceMatrix);
             }
 
             SteepestLocalSolver randomSteepestLocalSolver = new SteepestLocalSolver(this.groups, false, 0, false);
@@ -113,7 +112,7 @@ public class IteratedLocalSearch {
     /**
      * Execute after assign global best groups to groups usung in single iteration when isSmallPerturbation == false
      */
-    private void bigGroupPerturbation(double[][] distanceMatrix) {
+    private void bigRandomPerturbation(double[][] distanceMatrix) {
         List<Integer> destroyedPoints = new ArrayList<>();
         Random rand = new Random();
         int randomGroupId;
@@ -181,6 +180,14 @@ public class IteratedLocalSearch {
      */
     public ArrayList<Long> getIterationTimes() {
         return iterationTimes;
+    }
+
+    /**
+     * Perturbation mode - supported SMALL, BIG_RANDOM
+     */
+    public enum MODE {
+        SMALL,
+        BIG_RANDOM
     }
 }
 
