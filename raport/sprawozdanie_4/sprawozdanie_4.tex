@@ -39,7 +39,7 @@ W pętli wykonaj iterację aż osiągniesz limit iteracji lokalnego przeszukiwan
     W zależności od parametru metody, wykonaj przeszukiwanie lokalne z wykorzystaniem
     algorytmu Greedy bądź Steepest
 
-    Jeżeli osiągnęto lepsze rozwiązanie niż do tej pory najlepsze {
+    Jeżeli osiągnięto lepsze rozwiązanie niż do tej pory najlepsze {
         Zapisz wartość funkcji celu
         Zapisz uzyskany przydział punktów do grup
     }
@@ -103,11 +103,115 @@ Dla każdego usuniętego punktu {
 
 \section{Wyniki eksperymentów obliczeniowych}
 \label{section:wyniki}
-TODO
+
+W tabeli \ref{table:wyniki} zaprezentowano wyniki eksperymentów obliczeniowych. Dokonano $100$ powtórzeń obliczeń. Za każdym razem algorytmy zostały uruchomione dla rozwiązań startowych zbudowanych z wykorzystaniem algorytmu naiwnego.
+\begin{table}[H]
+\centering
+\caption{Wyniki eksperymentów obliczeniowych}
+\label{table:wyniki}
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{|c|r|r|r|r|}
+\hline
+\textbf{Cecha} &                                                        \multicolumn{1}{c|}{\textbf{MSLS}} & \multicolumn{1}{c|}{\textbf{ILS small perturbation}} & \multicolumn{1}{c|}{\textbf{ILS big perturbation}} &
+\multicolumn{1}{c|}{\textbf{ILS big perturbation heuristic}} 
+
+                                       \\ \hline
+\textbf{\begin{tabular}[c]{@{}c@{}}Wartość maksymalna\\funkcji celu\end{tabular}}
+&   26.39
+&   26.68
+&   26.57
+&   26.57\\ \hline
+\textbf{\begin{tabular}[c]{@{}c@{}}Wartość średnia\\funkcji celu\end{tabular}}
+&   26.37
+&   26.68
+&   26.39
+&   26.57                                                 \\ \hline
+\textbf{\begin{tabular}[c]{@{}c@{}}Wartość minimalna\\funkcji celu\end{tabular}}
+&   26.37
+&   26.68
+&   26.39
+&   26.57                                                 \\ \hline
+\textbf{\begin{tabular}[c]{@{}c@{}}Wartość minimalna\\czasu obliczeń {[}sec{]}\end{tabular}}
+&   73.79
+&   798.87
+&   799.04
+&   799.00                                               \\ \hline
+\textbf{\begin{tabular}[c]{@{}c@{}}Wartość maksymalna\\czasu obliczeń {[}sec{]}\end{tabular}}
+&   111.97
+&   798.87
+&   799.04
+&   799.00                                               \\ \hline
+\textbf{\begin{tabular}[c]{@{}c@{}}Wartość średnia\\czasu obliczeń {[}sec{]}\end{tabular}}
+&   79.88
+&   798.87
+&   799.04
+&   799.00                                                \\ \hline
+\end{tabular}%
+}
+\end{table}
+Algorytm MSLS osiągał średnio najlepsze wyniki. Niewiele gorzej sprawdził się ILS z dużymi perturbacjami. Zgodnie z oczekiwaniami wprowadzanie niewielkich zmian w przydziale do grup nie wystarczało, by znacząco oddalić się od minimów lokalnych i końcowo algorytm z małymi perturbacjami nie osiągał wysokich wyników. W porównaniu z poprzednimi testowanymi algorytmami, stworzone w ramach czwartego etapu projektu działają o wiele dłużej. Spowodowane jest to oczywiście ich charakterystyką, tym, że złożone są właściwie z wielokrotnych powtórzeń lokalnego przeszukiwania.
 
 \section{Wizualizacja najlepszych rozwiązań}
 Podobnie jak w poprzednich etapach projektu, również w tym zastosowano wizualizację najlepszych rozwiązań na trzy sposoby. Pierwszy z nich to zaprezentowanie samych grup punktów, bez jakichkolwiek powiązań. Drugim sposobem jest prezentacja zgodna z funkcją celu, czyli zaprezentowanie powiązań pomiędzy punktami w ramach grupy. Ostatni sposób wykorzystuje minimalne drzewo rozpinające, które w przejrzysty sposób prezentuje przydział punktów do grup.
 
-TODO
+\begin{figure}[H]
+     \begin{center}
+        \subfigure{
+            \includegraphics[width=0.45\textwidth]{sprawozdanie_4/msls.PNG}
+        }
+        \subfigure{
+           \includegraphics[width=0.45\textwidth]{sprawozdanie_4/msls_groups.PNG}
+        }\\
+        \subfigure{
+            \includegraphics[width=0.45\textwidth]{sprawozdanie_4/msls_mst.PNG}
+        }
+    \end{center}
+    \caption{MSLS}
+\end{figure}
+
+\begin{figure}[H]
+     \begin{center}
+        \subfigure{
+            \includegraphics[width=0.45\textwidth]{sprawozdanie_4/ils_small.PNG}
+        }
+        \subfigure{
+           \includegraphics[width=0.45\textwidth]{sprawozdanie_4/ils_small_groups.PNG}
+        }\\
+        \subfigure{
+            \includegraphics[width=0.45\textwidth]{sprawozdanie_4/ils_small_mst.PNG}
+        }
+    \end{center}
+    \caption{ILS small perturbation}
+\end{figure}
+
+\begin{figure}[H]
+     \begin{center}
+        \subfigure{
+            \includegraphics[width=0.45\textwidth]{sprawozdanie_4/ils_big.PNG}
+        }
+        \subfigure{
+           \includegraphics[width=0.45\textwidth]{sprawozdanie_4/ils_big_groups.PNG}
+        }\\
+        \subfigure{
+            \includegraphics[width=0.45\textwidth]{sprawozdanie_4/ils_big_mst.PNG}
+        }
+    \end{center}
+    \caption{ILS big perturbation}
+\end{figure}
+
+\begin{figure}[H]
+     \begin{center}
+        \subfigure{
+            \includegraphics[width=0.45\textwidth]{sprawozdanie_4/ils_heuristic.PNG}
+        }
+        \subfigure{
+           \includegraphics[width=0.45\textwidth]{sprawozdanie_4/ils_heuristic_groups.PNG}
+        }\\
+        \subfigure{
+            \includegraphics[width=0.45\textwidth]{sprawozdanie_4/ils_heuristic_mst.PNG}
+        }
+    \end{center}
+    \caption{ILS big perturbation heuristic}
+\end{figure}
 
 \end{document}
