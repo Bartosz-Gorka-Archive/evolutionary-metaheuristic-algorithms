@@ -272,3 +272,33 @@ Max time for naive steepest candidate = 2.050889699E9
 Max time for naive steepest cache = 4.0168981048E10
 Max time for naive steepest candidate + cache = 2.520349143E9
 ```
+
+## Task 4
+```
+Min result for MSLS = 26.373310793801114
+Min result for ILS small perturbation = 26.741260751749792
+Min result for ILS big random perturbation = 26.373310793801835
+Min result for ILS big heuristic perturbation = 26.37331079380183
+Mean result for MSLS = 26.379266000591805
+Mean result for ILS small perturbation = 27.18527906869686
+Mean result for ILS big random perturbation = 26.414335063148304
+Mean result for ILS big heuristic perturbation = 26.876501906065585
+Max result for MSLS = 26.395535870863107
+Max result for ILS small perturbation = 27.820126930722033
+Max result for ILS big random perturbation = 26.490608638583936
+Max result for ILS big heuristic perturbation = 27.335237007683777
+
+TIMING:
+Min time for MSLS = 38.59564335
+Min time for ILS small perturbation = 392.697860707
+Min time for ILS big random perturbation = 392.700572927
+Min time for ILS big heuristic perturbation = 392.743207554
+Mean time for MSLS = 39.97228733398
+Mean time for ILS small perturbation = 399.760888031
+Mean time for ILS big random perturbation = 399.7769527616
+Mean time for ILS big heuristic perturbation = 399.7722327566
+Max time for MSLS = 52.18850176
+Max time for ILS small perturbation = 446.754591477
+Max time for ILS big random perturbation = 446.817009173
+Max time for ILS big heuristic perturbation = 446.821177664
+```
