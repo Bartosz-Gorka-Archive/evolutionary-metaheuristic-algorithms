@@ -104,7 +104,8 @@ Dla każdego usuniętego punktu {
 \section{Wyniki eksperymentów obliczeniowych}
 \label{section:wyniki}
 
-W tabeli \ref{table:wyniki} zaprezentowano wyniki eksperymentów obliczeniowych. Dokonano $100$ powtórzeń obliczeń. Za każdym razem algorytmy zostały uruchomione dla rozwiązań startowych zbudowanych z wykorzystaniem algorytmu naiwnego.
+W tabeli \ref{table:wyniki} zaprezentowano wyniki eksperymentów obliczeniowych. W przypadku \texttt{Multiple Start Local Search} podany czas dotyczy obliczeń dotyczy minimalnej/maksymalnej/średniej wartości z 10 uruchomień algorytmu. Dla algorytmu iteracyjnego, wartości czasu obliczeń dotyczą całego procesu (od uruchomienia do wyczerpania limitu czasowego). W algorytmach nie wykorzystano cache ani ruchów kandydackich. Cały proces testowania algorytmów został wykonany 10-cio krotnie, aby możliwe było wskazanie wartości średniej.
+
 \begin{table}[H]
 \centering
 \caption{Wyniki eksperymentów obliczeniowych}
@@ -113,43 +114,47 @@ W tabeli \ref{table:wyniki} zaprezentowano wyniki eksperymentów obliczeniowych.
 \begin{tabular}{|c|r|r|r|r|}
 \hline
 \textbf{Cecha} &                                                        \multicolumn{1}{c|}{\textbf{MSLS}} & \multicolumn{1}{c|}{\textbf{ILS small perturbation}} & \multicolumn{1}{c|}{\textbf{ILS big perturbation}} &
-\multicolumn{1}{c|}{\textbf{ILS big perturbation heuristic}} 
+\multicolumn{1}{c|}{\textbf{ILS big perturbation heuristic}}
 
                                        \\ \hline
-\textbf{\begin{tabular}[c]{@{}c@{}}Wartość maksymalna\\funkcji celu\end{tabular}}
-&   26.39
-&   26.68
-&   26.57
-&   26.57\\ \hline
-\textbf{\begin{tabular}[c]{@{}c@{}}Wartość średnia\\funkcji celu\end{tabular}}
-&   26.37
-&   26.68
-&   26.39
-&   26.57                                                 \\ \hline
 \textbf{\begin{tabular}[c]{@{}c@{}}Wartość minimalna\\funkcji celu\end{tabular}}
 &   26.37
-&   26.68
+&   26.74
+&   26.37
+&   26.37                                                 \\ \hline
+\textbf{\begin{tabular}[c]{@{}c@{}}Wartość maksymalna\\funkcji celu\end{tabular}}
 &   26.39
-&   26.57                                                 \\ \hline
+&   27.82
+&   26.49
+&   27.33\\ \hline
+\textbf{\begin{tabular}[c]{@{}c@{}}Wartość średnia\\funkcji celu\end{tabular}}
+&   26.37
+&   27.18
+&   26.41
+&   26.87                                                 \\ \hline
 \textbf{\begin{tabular}[c]{@{}c@{}}Wartość minimalna\\czasu obliczeń {[}sec{]}\end{tabular}}
-&   73.79
-&   798.87
-&   799.04
-&   799.00                                               \\ \hline
+&   38.59
+&   392.69
+&   392.70
+&   392.74                                               \\ \hline
 \textbf{\begin{tabular}[c]{@{}c@{}}Wartość maksymalna\\czasu obliczeń {[}sec{]}\end{tabular}}
-&   111.97
-&   798.87
-&   799.04
-&   799.00                                               \\ \hline
+&   52.18
+&   446.75
+&   446.81
+&   446.82                                               \\ \hline
 \textbf{\begin{tabular}[c]{@{}c@{}}Wartość średnia\\czasu obliczeń {[}sec{]}\end{tabular}}
-&   79.88
-&   798.87
-&   799.04
-&   799.00                                                \\ \hline
+&   39.97
+&   399.76
+&   399.77
+&   399.77                                                \\ \hline
 \end{tabular}%
 }
 \end{table}
-Algorytm MSLS osiągał średnio najlepsze wyniki. Niewiele gorzej sprawdził się ILS z dużymi perturbacjami. Zgodnie z oczekiwaniami wprowadzanie niewielkich zmian w przydziale do grup nie wystarczało, by znacząco oddalić się od minimów lokalnych i końcowo algorytm z małymi perturbacjami nie osiągał wysokich wyników. W porównaniu z poprzednimi testowanymi algorytmami, stworzone w ramach czwartego etapu projektu działają o wiele dłużej. Spowodowane jest to oczywiście ich charakterystyką, tym, że złożone są właściwie z wielokrotnych powtórzeń lokalnego przeszukiwania.
+Algorytm MSLS osiągał średnio najlepsze wyniki. Porównywalnie sprawdził się ILS z dużymi perturbacjami. Zgodnie z oczekiwaniami, wprowadzanie niewielkich zmian w przydziale do grup nie wystarczało, aby znacząco oddalić się od minimów lokalnych i ostatecznie algorytm z małymi perturbacjami nie osiągnął dobrych wyników. W porównaniu z poprzednimi testowanymi algorytmami, stworzone w ramach czwartego etapu projektu działają o wiele dłużej. Spowodowane jest to oczywiście ich charakterystyką, tj. wykorzystują wielokrotne uruchomienie lokalnego przeszukiwania.
+
+Na wskazanie zasługuje testowany dodatkowo przypadek. Każdy z algorytmów otrzymał ograniczony czas wykonania (20 sekund), w którym powinien poprawić rozwiązanie. Najlepszy wynik uzyskał \texttt{algorytm iteracyjnego przeszukiwania lokalnego z heurystyczną funkcją destroy}.
+
+Zdeklasował on zarówno algorytm \texttt{ILS} w pozostałych wersjach, jak i \textit{MSLS} uzyskując wynik \textit{26.41}, podczas gdy pozostałe algorytmy ponad \textit{26.57} (potrzebowałyby one dodatkowy czas, aby móc poprawić rozwiązanie).
 
 \section{Wizualizacja najlepszych rozwiązań}
 Podobnie jak w poprzednich etapach projektu, również w tym zastosowano wizualizację najlepszych rozwiązań na trzy sposoby. Pierwszy z nich to zaprezentowanie samych grup punktów, bez jakichkolwiek powiązań. Drugim sposobem jest prezentacja zgodna z funkcją celu, czyli zaprezentowanie powiązań pomiędzy punktami w ramach grupy. Ostatni sposób wykorzystuje minimalne drzewo rozpinające, które w przejrzysty sposób prezentuje przydział punktów do grup.
@@ -157,13 +162,13 @@ Podobnie jak w poprzednich etapach projektu, również w tym zastosowano wizuali
 \begin{figure}[H]
      \begin{center}
         \subfigure{
-            \includegraphics[width=0.45\textwidth]{sprawozdanie_4/msls.PNG}
+            \includegraphics[width=0.45\textwidth]{sprawozdanie_4/msls.png}
         }
         \subfigure{
-           \includegraphics[width=0.45\textwidth]{sprawozdanie_4/msls_groups.PNG}
+           \includegraphics[width=0.45\textwidth]{sprawozdanie_4/msls_groups.png}
         }\\
         \subfigure{
-            \includegraphics[width=0.45\textwidth]{sprawozdanie_4/msls_mst.PNG}
+            \includegraphics[width=0.45\textwidth]{sprawozdanie_4/msls_mst.png}
         }
     \end{center}
     \caption{MSLS}
@@ -172,13 +177,13 @@ Podobnie jak w poprzednich etapach projektu, również w tym zastosowano wizuali
 \begin{figure}[H]
      \begin{center}
         \subfigure{
-            \includegraphics[width=0.45\textwidth]{sprawozdanie_4/ils_small.PNG}
+            \includegraphics[width=0.45\textwidth]{sprawozdanie_4/ils_small.png}
         }
         \subfigure{
-           \includegraphics[width=0.45\textwidth]{sprawozdanie_4/ils_small_groups.PNG}
+           \includegraphics[width=0.45\textwidth]{sprawozdanie_4/ils_small_groups.png}
         }\\
         \subfigure{
-            \includegraphics[width=0.45\textwidth]{sprawozdanie_4/ils_small_mst.PNG}
+            \includegraphics[width=0.45\textwidth]{sprawozdanie_4/ils_small_mst.png}
         }
     \end{center}
     \caption{ILS small perturbation}
@@ -187,13 +192,13 @@ Podobnie jak w poprzednich etapach projektu, również w tym zastosowano wizuali
 \begin{figure}[H]
      \begin{center}
         \subfigure{
-            \includegraphics[width=0.45\textwidth]{sprawozdanie_4/ils_big.PNG}
+            \includegraphics[width=0.45\textwidth]{sprawozdanie_4/ils_big.png}
         }
         \subfigure{
-           \includegraphics[width=0.45\textwidth]{sprawozdanie_4/ils_big_groups.PNG}
+           \includegraphics[width=0.45\textwidth]{sprawozdanie_4/ils_big_groups.png}
         }\\
         \subfigure{
-            \includegraphics[width=0.45\textwidth]{sprawozdanie_4/ils_big_mst.PNG}
+            \includegraphics[width=0.45\textwidth]{sprawozdanie_4/ils_big_mst.png}
         }
     \end{center}
     \caption{ILS big perturbation}
@@ -202,13 +207,13 @@ Podobnie jak w poprzednich etapach projektu, również w tym zastosowano wizuali
 \begin{figure}[H]
      \begin{center}
         \subfigure{
-            \includegraphics[width=0.45\textwidth]{sprawozdanie_4/ils_heuristic.PNG}
+            \includegraphics[width=0.45\textwidth]{sprawozdanie_4/ils_heuristic.png}
         }
         \subfigure{
-           \includegraphics[width=0.45\textwidth]{sprawozdanie_4/ils_heuristic_groups.PNG}
+           \includegraphics[width=0.45\textwidth]{sprawozdanie_4/ils_heuristic_groups.png}
         }\\
         \subfigure{
-            \includegraphics[width=0.45\textwidth]{sprawozdanie_4/ils_heuristic_mst.PNG}
+            \includegraphics[width=0.45\textwidth]{sprawozdanie_4/ils_heuristic_mst.png}
         }
     \end{center}
     \caption{ILS big perturbation heuristic}
