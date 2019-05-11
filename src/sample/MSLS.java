@@ -45,7 +45,7 @@ public class MSLS {
 
     private HashMap<Integer, HashSet<Integer>> randomInitGroups() {
         HashMap<Integer, HashSet<Integer>> groupsWithPoints = new HashMap<>();
-        for (Map.Entry<Integer, HashSet<Integer>> entry : Main.randomInitGroups(this.distanceMatrix, this.startIndexesList, this.coordinates).entrySet()) {
+        for (Map.Entry<Integer, HashSet<Integer>> entry : Main.randomInitGroups(this.startIndexesList, this.coordinates).entrySet()) {
             HashSet<Integer> set = new HashSet<>(entry.getValue());
             groupsWithPoints.put(entry.getKey(), set);
         }

@@ -51,7 +51,7 @@ public class Main extends Application {
      * @param coordinates      All points list
      * @return Random assignment to groups
      */
-    public static HashMap<Integer, HashSet<Integer>> randomInitGroups(double[][] distanceMatrix, ArrayList<Integer> startIndexesList, ArrayList<PointCoordinates> coordinates) {
+    public static HashMap<Integer, HashSet<Integer>> randomInitGroups(ArrayList<Integer> startIndexesList, ArrayList<PointCoordinates> coordinates) {
         HashMap<Integer, HashSet<Integer>> elementsWithAssignmentToGroups = new HashMap<>();
         Random random = new Random();
 
@@ -147,7 +147,7 @@ public class Main extends Application {
 
             // Naive and random instances
             HashMap<Integer, HashSet<Integer>> naiveInstances = naiveAlgorithm(distanceMatrix, startIndexesList, coordinates);
-            HashMap<Integer, HashSet<Integer>> randomInstances = randomInitGroups(distanceMatrix, startIndexesList, coordinates);
+            HashMap<Integer, HashSet<Integer>> randomInstances = randomInitGroups(startIndexesList, coordinates);
 
             /*
              * GREEDY NAIVE
