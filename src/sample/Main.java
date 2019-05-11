@@ -35,7 +35,6 @@ public class Main extends Application {
      * How many candidates we chose in steepest naive candidates algorithm
      */
     private final static int CANDIDATES_NUMBER = 10;
-    private final static int MSLS_ITERATIONS = 10;
     private final static int MSLS_LS_ITERATIONS = 100;
     /**
      * Mode - Greedy when 0 else Steepest
@@ -115,9 +114,8 @@ public class Main extends Application {
                 naiveSteepestCandidateCacheTimes = new double[TESTS_NUMBER],
                 ILSSmallPerturbationTimes = new double[TESTS_NUMBER], ILSSmallPerturbationResults = new double[TESTS_NUMBER],
                 ILSBigPerturbationTimes = new double[TESTS_NUMBER], ILSBigPerturbationResults = new double[TESTS_NUMBER],
-                ILSBigHeuristicPerturbationTimes = new double[TESTS_NUMBER], ILSBigHeuristicPerturbationResults = new double[TESTS_NUMBER];
-
-        double[][] MSLSTimes = new double[TESTS_NUMBER][MSLS_ITERATIONS], MSLSResults = new double[TESTS_NUMBER][MSLS_ITERATIONS];
+                ILSBigHeuristicPerturbationTimes = new double[TESTS_NUMBER], ILSBigHeuristicPerturbationResults = new double[TESTS_NUMBER],
+                MSLSTimes = new double[TESTS_NUMBER], MSLSResults = new double[TESTS_NUMBER];
 
         double bestNaiveGreedyResult = Double.MAX_VALUE, bestRandomGreedyResult = Double.MAX_VALUE,
                 bestNaiveSteepestResult = Double.MAX_VALUE, bestRandomSteepestResult = Double.MAX_VALUE,
@@ -262,21 +260,18 @@ public class Main extends Application {
             long iterated_local_search_time_limit = (long) (30.0 * 1_000_000_000.0);
             if (EXECUTE_MSLS) {
                 iterated_local_search_time_limit = System.nanoTime();
-                for (int i = 0; i < MSLS_ITERATIONS; i++) {
-                    System.out.println("MSLS Iteration " + i);
-                    startTime = System.nanoTime();
-                    MSLS msls = new MSLS(MSLS_MODE, MSLS_LS_ITERATIONS, startIndexesList, distanceMatrix, coordinates);
-                    msls.run();
+                startTime = System.nanoTime();
+                MSLS msls = new MSLS(MSLS_MODE, MSLS_LS_ITERATIONS, startIndexesList, distanceMatrix, coordinates);
+                msls.run();
 
-                    MSLSResults[iteration][i] = msls.getMinPenalties();
-                    if (msls.getMinPenalties() < bestMSLSResult) {
-                        bestMSLSResult = msls.getMinPenalties();
-                        bestMSLSGroupsMST = (castLocalSearchToMSTGraph(msls.getGroups(), distanceMatrix));
-                        bestMSLSGroupsConnections = (castLocalSearchToConnectionGraph(msls.getGroups(), distanceMatrix));
-                    }
-
-                    MSLSTimes[iteration][i] = System.nanoTime() - startTime;
+                MSLSResults[iteration] = msls.getMinPenalties();
+                if (msls.getMinPenalties() < bestMSLSResult) {
+                    bestMSLSResult = msls.getMinPenalties();
+                    bestMSLSGroupsMST = (castLocalSearchToMSTGraph(msls.getGroups(), distanceMatrix));
+                    bestMSLSGroupsConnections = (castLocalSearchToConnectionGraph(msls.getGroups(), distanceMatrix));
                 }
+
+                MSLSTimes[iteration] = System.nanoTime() - startTime;
                 iterated_local_search_time_limit = System.nanoTime() - iterated_local_search_time_limit;
             }
             /*
@@ -431,15 +426,8 @@ public class Main extends Application {
                 System.out.println("Mean result for naive steepest cache = " + Arrays.stream(naiveSteepestCacheResults).average().getAsDouble());
             if (EXECUTE_STEEPEST_CANDIDATE_CACHE)
                 System.out.println("Mean result for naive steepest candidate + cache = " + Arrays.stream(naiveSteepestCandidateCacheResults).average().getAsDouble());
-            if (EXECUTE_MSLS) {
-                double[] mean = new double[TESTS_NUMBER];
-                int i = 0;
-                for (double[] v : MSLSResults) {
-                    mean[i] = Arrays.stream(v).average().getAsDouble();
-                    i++;
-                }
-                System.out.println("Mean result for MSLS = " + Arrays.stream(mean).average().getAsDouble());
-            }
+            if (EXECUTE_MSLS)
+                System.out.println("Mean result for MSLS = " + Arrays.stream(MSLSResults).average().getAsDouble());
             if (EXECUTE_ILS_SMALL_PERTURBATION)
                 System.out.println("Mean result for ILS small perturbation = " + Arrays.stream(ILSSmallPerturbationResults).average().getAsDouble());
             if (EXECUTE_ILS_BIG_PERTURBATION)
@@ -462,7 +450,7 @@ public class Main extends Application {
             if (EXECUTE_STEEPEST_CANDIDATE_CACHE)
                 System.out.println("Max result for naive steepest candidate + cache = " + Arrays.stream(naiveSteepestCandidateCacheResults).max().getAsDouble());
             if (EXECUTE_MSLS)
-                System.out.println("Max result for MSLS = " + Arrays.stream(MSLSResults).flatMapToDouble(Arrays::stream).max().getAsDouble());
+                System.out.println("Max result for MSLS = " + Arrays.stream(MSLSResults).max().getAsDouble());
             if (EXECUTE_ILS_SMALL_PERTURBATION)
                 System.out.println("Max result for ILS small perturbation = " + Arrays.stream(ILSSmallPerturbationResults).max().getAsDouble());
             if (EXECUTE_ILS_BIG_PERTURBATION)
@@ -486,7 +474,7 @@ public class Main extends Application {
             if (EXECUTE_STEEPEST_CANDIDATE_CACHE)
                 System.out.println("Min time for naive steepest candidate + cache = " + Arrays.stream(naiveSteepestCandidateCacheTimes).min().getAsDouble() / 1_000_000_000.0);
             if (EXECUTE_MSLS)
-                System.out.println("Min time for MSLS = " + Arrays.stream(MSLSTimes).flatMapToDouble(Arrays::stream).min().getAsDouble() / 1_000_000_000.0);
+                System.out.println("Min time for MSLS = " + Arrays.stream(MSLSTimes).min().getAsDouble() / 1_000_000_000.0);
             if (EXECUTE_ILS_SMALL_PERTURBATION)
                 System.out.println("Min time for ILS small perturbation = " + Arrays.stream(ILSSmallPerturbationTimes).min().getAsDouble() / 1_000_000_000.0);
             if (EXECUTE_ILS_BIG_PERTURBATION)
@@ -508,15 +496,8 @@ public class Main extends Application {
                 System.out.println("Mean time for naive steepest cache = " + Arrays.stream(naiveSteepestCacheTimes).average().getAsDouble() / 1_000_000_000.0);
             if (EXECUTE_STEEPEST_CANDIDATE_CACHE)
                 System.out.println("Mean time for naive steepest candidate + cache = " + Arrays.stream(naiveSteepestCandidateCacheTimes).average().getAsDouble() / 1_000_000_000.0);
-            if (EXECUTE_MSLS) {
-                double[] mean = new double[TESTS_NUMBER];
-                int i = 0;
-                for (double[] v : MSLSTimes) {
-                    mean[i] = Arrays.stream(v).average().getAsDouble();
-                    i++;
-                }
-                System.out.println("Mean time for MSLS = " + Arrays.stream(mean).average().getAsDouble() / 1_000_000_000.0);
-            }
+            if (EXECUTE_MSLS)
+                System.out.println("Mean time for MSLS = " + Arrays.stream(MSLSTimes).average().getAsDouble() / 1_000_000_000.0);
             if (EXECUTE_ILS_SMALL_PERTURBATION)
                 System.out.println("Mean time for ILS small perturbation = " + Arrays.stream(ILSSmallPerturbationTimes).average().getAsDouble() / 1_000_000_000.0);
             if (EXECUTE_ILS_BIG_PERTURBATION)
@@ -540,7 +521,7 @@ public class Main extends Application {
             if (EXECUTE_STEEPEST_CANDIDATE_CACHE)
                 System.out.println("Max time for naive steepest candidate + cache = " + Arrays.stream(naiveSteepestCandidateCacheTimes).max().getAsDouble() / 1_000_000_000.0);
             if (EXECUTE_MSLS)
-                System.out.println("Max time for MSLS = " + Arrays.stream(MSLSTimes).flatMapToDouble(Arrays::stream).max().getAsDouble() / 1_000_000_000.0);
+                System.out.println("Max time for MSLS = " + Arrays.stream(MSLSTimes).max().getAsDouble() / 1_000_000_000.0);
             if (EXECUTE_ILS_SMALL_PERTURBATION)
                 System.out.println("Max time for ILS small perturbation = " + Arrays.stream(ILSSmallPerturbationTimes).max().getAsDouble() / 1_000_000_000.0);
             if (EXECUTE_ILS_BIG_PERTURBATION)
