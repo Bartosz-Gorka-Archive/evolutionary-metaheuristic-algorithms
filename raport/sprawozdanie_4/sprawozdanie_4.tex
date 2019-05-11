@@ -119,42 +119,38 @@ W tabeli \ref{table:wyniki} zaprezentowano wyniki eksperymentów obliczeniowych.
                                        \\ \hline
 \textbf{\begin{tabular}[c]{@{}c@{}}Wartość minimalna\\funkcji celu\end{tabular}}
 &   26.37
-&   26.74
+&   26.44
 &   26.37
-&   26.37                                                 \\ \hline
+&   26.65                                                 \\ \hline
 \textbf{\begin{tabular}[c]{@{}c@{}}Wartość maksymalna\\funkcji celu\end{tabular}}
-&   26.39
-&   27.82
-&   26.49
-&   27.33\\ \hline
+&   26.38
+&   27.78
+&   26.74
+&   27.08\\ \hline
 \textbf{\begin{tabular}[c]{@{}c@{}}Wartość średnia\\funkcji celu\end{tabular}}
 &   26.37
-&   27.18
-&   26.41
-&   26.87                                                 \\ \hline
+&   27.03
+&   26.51
+&   26.82                                                 \\ \hline
 \textbf{\begin{tabular}[c]{@{}c@{}}Wartość minimalna\\czasu obliczeń {[}sec{]}\end{tabular}}
-&   38.59
-&   392.69
-&   392.70
-&   392.74                                               \\ \hline
+&   38.50
+&   38.55
+&   38.54
+&   38.54                                               \\ \hline
 \textbf{\begin{tabular}[c]{@{}c@{}}Wartość maksymalna\\czasu obliczeń {[}sec{]}\end{tabular}}
-&   52.18
-&   446.75
-&   446.81
-&   446.82                                               \\ \hline
+&   43.57
+&   43.58
+&   43.64
+&   43.57                                               \\ \hline
 \textbf{\begin{tabular}[c]{@{}c@{}}Wartość średnia\\czasu obliczeń {[}sec{]}\end{tabular}}
-&   39.97
-&   399.76
-&   399.77
-&   399.77                                                \\ \hline
+&   40.21
+&   40.26
+&   40.26
+&   40.23                                                \\ \hline
 \end{tabular}%
 }
 \end{table}
 Algorytm MSLS osiągał średnio najlepsze wyniki. Porównywalnie sprawdził się ILS z dużymi perturbacjami. Zgodnie z oczekiwaniami, wprowadzanie niewielkich zmian w przydziale do grup nie wystarczało, aby znacząco oddalić się od minimów lokalnych i ostatecznie algorytm z małymi perturbacjami nie osiągnął dobrych wyników. W porównaniu z poprzednimi testowanymi algorytmami, stworzone w ramach czwartego etapu projektu działają o wiele dłużej. Spowodowane jest to oczywiście ich charakterystyką, tj. wykorzystują wielokrotne uruchomienie lokalnego przeszukiwania.
-
-Na wskazanie zasługuje testowany dodatkowo przypadek. Każdy z algorytmów otrzymał ograniczony czas wykonania (20 sekund), w którym powinien poprawić rozwiązanie. Najlepszy wynik uzyskał \texttt{algorytm iteracyjnego przeszukiwania lokalnego z heurystyczną funkcją destroy}.
-
-Zdeklasował on zarówno algorytm \texttt{ILS} w pozostałych wersjach, jak i \textit{MSLS} uzyskując wynik \textit{26.41}, podczas gdy pozostałe algorytmy ponad \textit{26.57} (potrzebowałyby one dodatkowy czas, aby móc poprawić rozwiązanie).
 
 \section{Wizualizacja najlepszych rozwiązań}
 Podobnie jak w poprzednich etapach projektu, również w tym zastosowano wizualizację najlepszych rozwiązań na trzy sposoby. Pierwszy z nich to zaprezentowanie samych grup punktów, bez jakichkolwiek powiązań. Drugim sposobem jest prezentacja zgodna z funkcją celu, czyli zaprezentowanie powiązań pomiędzy punktami w ramach grupy. Ostatni sposób wykorzystuje minimalne drzewo rozpinające, które w przejrzysty sposób prezentuje przydział punktów do grup.

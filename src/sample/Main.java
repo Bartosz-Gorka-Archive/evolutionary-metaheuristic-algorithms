@@ -13,7 +13,7 @@ public class Main extends Application {
     /**
      * Number of iterations in test stage
      */
-    private final static int TESTS_NUMBER = 1;
+    private final static int TESTS_NUMBER = 10;
     /**
      * Should we show extra logs and statistics?
      */
@@ -46,7 +46,6 @@ public class Main extends Application {
     }
 
     /**
-     * @param distanceMatrix   Distance matrix
      * @param startIndexesList Start assignment (indexes)
      * @param coordinates      All points list
      * @return Random assignment to groups
