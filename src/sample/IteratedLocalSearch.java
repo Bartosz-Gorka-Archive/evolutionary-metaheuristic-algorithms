@@ -163,7 +163,7 @@ public class IteratedLocalSearch {
      */
     private void bigHeuristicPerturbation(double[][] distanceMatrix) {
         List<Integer> destroyedPoints = new ArrayList<>();
-        int selectedGroupIndex = 0;
+        int selectedGroupIndex = 0, elementsCount;
         double minDistanceValue, distance;
 
         // Destroy
@@ -171,11 +171,15 @@ public class IteratedLocalSearch {
         for (Map.Entry<Integer, HashSet<Integer>> entry : this.groups.entrySet()) {
             for (Integer pointID : entry.getValue()) {
                 distance = 0.0;
+                elementsCount = 0;
                 for (Integer neighborPointID : entry.getValue()) {
-                    distance += distanceMatrix[neighborPointID][pointID];
+                    if (!pointID.equals(neighborPointID)) {
+                        distance += distanceMatrix[neighborPointID][pointID];
+                        elementsCount++;
+                    }
                 }
 
-                points.add(new Pair<>(new Pair<>(pointID, entry.getKey()), (int) (-distance * 1_000)));
+                points.add(new Pair<>(new Pair<>(pointID, entry.getKey()), (int) (-distance * 1_000 / elementsCount)));
             }
         }
 
@@ -194,14 +198,16 @@ public class IteratedLocalSearch {
             // Find group with minimum distance between each point in group and current point
             for (Map.Entry<Integer, HashSet<Integer>> entry : this.groups.entrySet()) {
                 distance = 0.0;
+                elementsCount = 0;
 
                 for (Integer neighborPointID : entry.getValue()) {
                     distance += distanceMatrix[neighborPointID][pointID];
+                    elementsCount++;
                 }
 
                 // Check distance is smaller than current stored - if yes => update index
-                if (distance < minDistanceValue) {
-                    minDistanceValue = distance;
+                if ((distance / elementsCount) < minDistanceValue) {
+                    minDistanceValue = (distance / elementsCount);
                     selectedGroupIndex = entry.getKey();
                 }
             }
