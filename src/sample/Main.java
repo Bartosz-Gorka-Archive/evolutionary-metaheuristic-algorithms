@@ -3,6 +3,9 @@ package sample;
 import javafx.application.Application;
 import javafx.stage.Stage;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.PrintWriter;
 import java.util.*;
 
 public class Main extends Application {
@@ -13,7 +16,7 @@ public class Main extends Application {
     /**
      * Number of iterations in test stage
      */
-    private final static int TESTS_NUMBER = 10;
+    private final static int TESTS_NUMBER = 500;
     /**
      * Should we show extra logs and statistics?
      */
@@ -22,15 +25,17 @@ public class Main extends Application {
      * Should we use following algorithms?
      */
     private final static boolean EXECUTE_GREEDY_NAIVE = false;
-    private final static boolean EXECUTE_GREEDY_RANDOM = false;
+    private final static boolean EXECUTE_GREEDY_RANDOM = true;
     private final static boolean EXECUTE_STEEPEST_NAIVE = false;
     private final static boolean EXECUTE_STEEPEST_RANDOM = false;
     private final static boolean EXECUTE_STEEPEST_CANDIDATE = false;
     private final static boolean EXECUTE_STEEPEST_CANDIDATE_CACHE = false;
     private final static boolean EXECUTE_STEEPEST_CACHE = false;
-    private final static boolean EXECUTE_MSLS = true;
-    private final static boolean EXECUTE_ILS_SMALL_PERTURBATION = true;
-    private final static boolean EXECUTE_ILS_BIG_PERTURBATION = true;
+    private final static boolean EXECUTE_MSLS = false;
+    private final static boolean EXECUTE_ILS_SMALL_PERTURBATION = false;
+    private final static boolean EXECUTE_ILS_BIG_PERTURBATION = false;
+    private final static boolean CALCULATE_STAT_QUALITY_SIMILARITY = true;
+
     /**
      * How many candidates we chose in steepest naive candidates algorithm
      */
@@ -103,6 +108,9 @@ public class Main extends Application {
         HashSet<ArrayList<PointsPath>> bestILSBigHeuristicPerturbationGroupsMST = new HashSet<>();
         HashSet<ArrayList<PointsPath>> bestILSBigHeuristicPerturbationGroupsConnections = new HashSet<>();
 
+        List<int[]> randomGreedySolutionsList = new ArrayList<>();
+        int[] bestGreedySolution = new int[coordinates.size()];
+
         double[] naiveGreedyResults = new double[TESTS_NUMBER], naiveSteepestResults = new double[TESTS_NUMBER],
                 randomGreedyResults = new double[TESTS_NUMBER], randomSteepestResults = new double[TESTS_NUMBER],
                 naiveSteepestCandidateResults = new double[TESTS_NUMBER], naiveSteepestCacheResults = new double[TESTS_NUMBER],
@@ -125,6 +133,7 @@ public class Main extends Application {
 
         // Using for statistics
         long startTime;
+        int totalElementsLength = coordinates.size();
 
         // Iterations
         for (int iteration = 0; iteration < TESTS_NUMBER; iteration++) {
@@ -133,7 +142,6 @@ public class Main extends Application {
              * INITIALIZATION STEP IN ITERATION
              */
             Random random = new Random();
-            int totalElementsLength = coordinates.size();
 
             // Generate randomized indexes of start points
             HashSet<Integer> startIndexesSet = new HashSet<>();
@@ -170,8 +178,26 @@ public class Main extends Application {
                 startTime = System.nanoTime();
                 GreedyLocalSolver randomGreedyLocalSolver = new GreedyLocalSolver(randomInstances);
                 randomGreedyLocalSolver.run(distanceMatrix);
+
+                // If enabled similarity - calculate stats
+                int[] pointsGroups = new int[totalElementsLength + 1];
+                if (CALCULATE_STAT_QUALITY_SIMILARITY) {
+                    HashMap<Integer, HashSet<Integer>> groups = randomGreedyLocalSolver.getGroups();
+                    for (Map.Entry<Integer, HashSet<Integer>> entry : groups.entrySet()) {
+                        for (Integer id : entry.getValue()) {
+                            pointsGroups[id] = entry.getKey();
+                        }
+                    }
+                    randomGreedySolutionsList.add(pointsGroups);
+                }
+
                 randomGreedyResults[iteration] = randomGreedyLocalSolver.getPenalties();
                 if (randomGreedyLocalSolver.getPenalties() < bestRandomGreedyResult) {
+                    if (CALCULATE_STAT_QUALITY_SIMILARITY) {
+                        // Using in quality-similarity statistic
+                        bestGreedySolution = pointsGroups;
+                    }
+
                     bestRandomGreedyResult = randomGreedyLocalSolver.getPenalties();
                     bestRandomGreedyGroupsMST = castLocalSearchToMSTGraph(randomGreedyLocalSolver.getGroups(), distanceMatrix);
                     bestRandomGreedyGroupsConnections = castLocalSearchToConnectionGraph(randomGreedyLocalSolver.getGroups(), distanceMatrix);
@@ -318,6 +344,44 @@ public class Main extends Application {
                 }
                 ILSBigHeuristicPerturbationTimes[iteration] = System.nanoTime() - startTime;
             }
+        }
+
+        if (CALCULATE_STAT_QUALITY_SIMILARITY) {
+            int[] similarity = new int[TESTS_NUMBER];
+
+            // Each solution compare with best
+            Arrays.fill(similarity, 0);
+            for (int i = 0; i < TESTS_NUMBER; i++) {
+                // Compare each pair with that pair in best solution
+                for (int p1 = 0; p1 < totalElementsLength; p1++) {
+                    for (int p2 = p1 + 1; p2 < totalElementsLength; p2++) {
+                        if (randomGreedySolutionsList.get(i)[p1] == randomGreedySolutionsList.get(i)[p2]
+                                && bestGreedySolution[p1] == bestGreedySolution[p2]) {
+                            similarity[i]++;
+                        }
+                    }
+                }
+            }
+            saveCsv(similarity, "raport/sprawozdanie_5/stat_best.csv", randomGreedyResults);
+
+            // Each solution compare with all
+            Arrays.fill(similarity, 0);
+            for (int i = 0; i < TESTS_NUMBER; i++) {
+                for (int j = 0; j < TESTS_NUMBER; j++) {
+                    if (i != j) {
+                        // Compare each pair
+                        for (int p1 = 0; p1 < totalElementsLength; p1++) {
+                            for (int p2 = p1 + 1; p2 < totalElementsLength; p2++) {
+                                if (randomGreedySolutionsList.get(i)[p1] == randomGreedySolutionsList.get(i)[p2]
+                                        && randomGreedySolutionsList.get(j)[p1] == randomGreedySolutionsList.get(j)[p2]) {
+                                    similarity[i]++;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            saveCsv(similarity, "raport/sprawozdanie_5/stat_all.csv", randomGreedyResults);
         }
 
         // Show groups on graph
@@ -504,7 +568,6 @@ public class Main extends Application {
             if (EXECUTE_ILS_BIG_PERTURBATION)
                 System.out.println("Mean time for ILS big heuristic perturbation = " + Arrays.stream(ILSBigHeuristicPerturbationTimes).average().getAsDouble() / 1_000_000_000.0);
 
-
             if (EXECUTE_GREEDY_NAIVE)
                 System.out.println("Max time for naive greedy = " + Arrays.stream(naiveGreedyTimes).max().getAsDouble() / 1_000_000_000.0);
             if (EXECUTE_GREEDY_RANDOM)
@@ -618,5 +681,37 @@ public class Main extends Application {
         }
 
         return elementsWithAssignmentToGroups;
+    }
+
+    /**
+     * Save similarity result to CSV file
+     *
+     * @param similarity          List of similarities
+     * @param fileName            Output file path
+     * @param randomGreedyResults Results
+     */
+    private void saveCsv(int[] similarity, String fileName, double[] randomGreedyResults) {
+        try (PrintWriter writer = new PrintWriter(new File(fileName))) {
+            StringBuilder sb = new StringBuilder();
+            sb.append("test_number");
+            sb.append(',');
+            sb.append("similarity");
+            sb.append(',');
+            sb.append("value");
+            sb.append('\n');
+
+            for (int i = 0; i < TESTS_NUMBER; i++) {
+                sb.append(i);
+                sb.append(',');
+                sb.append(similarity[i]);
+                sb.append(',');
+                sb.append(randomGreedyResults[i]);
+                sb.append('\n');
+            }
+            writer.write(sb.toString());
+
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
     }
 }
