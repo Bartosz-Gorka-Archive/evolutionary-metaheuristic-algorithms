@@ -110,7 +110,6 @@ public class Main extends Application {
 
         List<int[]> randomGreedySolutionsList = new ArrayList<>();
         int[] bestGreedySolution = new int[coordinates.size()];
-        int bestGreedySolutionNumber = 0;
 
         double[] naiveGreedyResults = new double[TESTS_NUMBER], naiveSteepestResults = new double[TESTS_NUMBER],
                 randomGreedyResults = new double[TESTS_NUMBER], randomSteepestResults = new double[TESTS_NUMBER],
@@ -134,6 +133,7 @@ public class Main extends Application {
 
         // Using for statistics
         long startTime;
+        int totalElementsLength = coordinates.size();
 
         // Iterations
         for (int iteration = 0; iteration < TESTS_NUMBER; iteration++) {
@@ -142,7 +142,6 @@ public class Main extends Application {
              * INITIALIZATION STEP IN ITERATION
              */
             Random random = new Random();
-            int totalElementsLength = coordinates.size();
 
             // Generate randomized indexes of start points
             HashSet<Integer> startIndexesSet = new HashSet<>();
@@ -179,7 +178,9 @@ public class Main extends Application {
                 startTime = System.nanoTime();
                 GreedyLocalSolver randomGreedyLocalSolver = new GreedyLocalSolver(randomInstances);
                 randomGreedyLocalSolver.run(distanceMatrix);
-                int[] pointsGroups = new int[coordinates.size() + 1];
+
+                // If enabled similarity - calculate stats
+                int[] pointsGroups = new int[totalElementsLength + 1];
                 if (CALCULATE_STAT_QUALITY_SIMILARITY) {
                     HashMap<Integer, HashSet<Integer>> groups = randomGreedyLocalSolver.getGroups();
                     for (Map.Entry<Integer, HashSet<Integer>> entry : groups.entrySet()) {
@@ -189,11 +190,13 @@ public class Main extends Application {
                     }
                     randomGreedySolutionsList.add(pointsGroups);
                 }
+
                 randomGreedyResults[iteration] = randomGreedyLocalSolver.getPenalties();
                 if (randomGreedyLocalSolver.getPenalties() < bestRandomGreedyResult) {
-                    //using in quality-similarity statistic
-                    bestGreedySolution = pointsGroups;
-                    bestGreedySolutionNumber = iteration;
+                    if (CALCULATE_STAT_QUALITY_SIMILARITY) {
+                        // Using in quality-similarity statistic
+                        bestGreedySolution = pointsGroups;
+                    }
 
                     bestRandomGreedyResult = randomGreedyLocalSolver.getPenalties();
                     bestRandomGreedyGroupsMST = castLocalSearchToMSTGraph(randomGreedyLocalSolver.getGroups(), distanceMatrix);
@@ -345,32 +348,31 @@ public class Main extends Application {
 
         if (CALCULATE_STAT_QUALITY_SIMILARITY) {
             int[] similarity = new int[TESTS_NUMBER];
-            //each solution compare with best
+
+            // Each solution compare with best
+            Arrays.fill(similarity, 0);
             for (int i = 0; i < TESTS_NUMBER; i++) {
-                similarity[i] = 0;
-                if (i != bestGreedySolutionNumber) {
-                    //compare each pair with that pair in best solution
-                    for (int p1 = 0; p1 < coordinates.size(); p1++) {
-                        for (int p2 = 0; p2 < coordinates.size(); p2++) {
-                            if (p1 != p2 && randomGreedySolutionsList.get(i)[p1] == randomGreedySolutionsList.get(i)[p2]
-                                    && bestGreedySolution[p1] == bestGreedySolution[p2]) {
-                                similarity[i]++;
-                            }
+                // Compare each pair with that pair in best solution
+                for (int p1 = 0; p1 < totalElementsLength; p1++) {
+                    for (int p2 = p1 + 1; p2 < totalElementsLength; p2++) {
+                        if (randomGreedySolutionsList.get(i)[p1] == randomGreedySolutionsList.get(i)[p2]
+                                && bestGreedySolution[p1] == bestGreedySolution[p2]) {
+                            similarity[i]++;
                         }
                     }
                 }
             }
-            saveCsv(similarity, "stat_best.txt", randomGreedyResults);
+            saveCsv(similarity, "raport/sprawozdanie_5/stat_best.csv", randomGreedyResults);
 
-            //each solution compare with all
+            // Each solution compare with all
+            Arrays.fill(similarity, 0);
             for (int i = 0; i < TESTS_NUMBER; i++) {
-                similarity[i] = 0;
                 for (int j = 0; j < TESTS_NUMBER; j++) {
                     if (i != j) {
-                        //compare each pair with each pair
-                        for (int p1 = 0; p1 < coordinates.size(); p1++) {
-                            for (int p2 = 0; p2 < coordinates.size(); p2++) {
-                                if (p1 != p2 && randomGreedySolutionsList.get(i)[p1] == randomGreedySolutionsList.get(i)[p2]
+                        // Compare each pair
+                        for (int p1 = 0; p1 < totalElementsLength; p1++) {
+                            for (int p2 = p1 + 1; p2 < totalElementsLength; p2++) {
+                                if (randomGreedySolutionsList.get(i)[p1] == randomGreedySolutionsList.get(i)[p2]
                                         && randomGreedySolutionsList.get(j)[p1] == randomGreedySolutionsList.get(j)[p2]) {
                                     similarity[i]++;
                                 }
@@ -379,10 +381,10 @@ public class Main extends Application {
                     }
                 }
             }
-            saveCsv(similarity, "stat_all.txt", randomGreedyResults);
+            saveCsv(similarity, "raport/sprawozdanie_5/stat_all.csv", randomGreedyResults);
         }
 
-            // Show groups on graph
+        // Show groups on graph
         if (EXECUTE_GREEDY_NAIVE) {
             new Drawer().drawInputInstance(coordinates, bestNaiveGreedyGroupsMST, "Naive greedy", true, true);
             new Drawer().drawInputInstance(coordinates, bestNaiveGreedyGroupsMST, "Naive greedy", true, false);
@@ -566,7 +568,6 @@ public class Main extends Application {
             if (EXECUTE_ILS_BIG_PERTURBATION)
                 System.out.println("Mean time for ILS big heuristic perturbation = " + Arrays.stream(ILSBigHeuristicPerturbationTimes).average().getAsDouble() / 1_000_000_000.0);
 
-
             if (EXECUTE_GREEDY_NAIVE)
                 System.out.println("Max time for naive greedy = " + Arrays.stream(naiveGreedyTimes).max().getAsDouble() / 1_000_000_000.0);
             if (EXECUTE_GREEDY_RANDOM)
@@ -681,28 +682,36 @@ public class Main extends Application {
 
         return elementsWithAssignmentToGroups;
     }
+
+    /**
+     * Save similarity result to CSV file
+     *
+     * @param similarity          List of similarities
+     * @param fileName            Output file path
+     * @param randomGreedyResults Results
+     */
     private void saveCsv(int[] similarity, String fileName, double[] randomGreedyResults) {
         try (PrintWriter writer = new PrintWriter(new File(fileName))) {
             StringBuilder sb = new StringBuilder();
             sb.append("test_number");
-            sb.append('-');
+            sb.append(',');
             sb.append("similarity");
-            sb.append('-');
+            sb.append(',');
             sb.append("value");
             sb.append('\n');
+
             for (int i = 0; i < TESTS_NUMBER; i++) {
-                System.out.println(similarity[i] + "\n");
                 sb.append(i);
-                sb.append('-');
+                sb.append(',');
                 sb.append(similarity[i]);
-                sb.append('-');
+                sb.append(',');
                 sb.append(randomGreedyResults[i]);
                 sb.append('\n');
             }
             writer.write(sb.toString());
 
         } catch (FileNotFoundException e) {
-            System.out.println(e.getMessage());
+            e.printStackTrace();
         }
     }
 }
