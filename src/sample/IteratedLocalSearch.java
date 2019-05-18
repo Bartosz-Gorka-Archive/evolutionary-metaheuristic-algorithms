@@ -6,10 +6,6 @@ import java.util.*;
 
 public class IteratedLocalSearch {
     /**
-     * List with duration of each iteration (in nanoseconds)
-     */
-    private ArrayList<Long> iterationTimes;
-    /**
      * How many points should be moved in perturbation
      */
     private int PERTURBATION_CHANGES_NUMBER;
@@ -37,7 +33,6 @@ public class IteratedLocalSearch {
         this.bestGroups = new HashMap<>();
         this.bestPenalties = Double.MAX_VALUE;
         this.PERTURBATION_MODE = perturbationMode;
-        this.iterationTimes = new ArrayList<>();
 
         int numberOfPoints = 0;
         for (Map.Entry<Integer, HashSet<Integer>> entry : groups.entrySet()) {
@@ -88,7 +83,6 @@ public class IteratedLocalSearch {
                 this.bestGroups = this.groups;
             }
 
-            this.iterationTimes.add(System.nanoTime() - time);
         } while (System.nanoTime() - startTime < timeLimit);
     }
 
@@ -233,15 +227,6 @@ public class IteratedLocalSearch {
      */
     public double getBestPenalties() {
         return this.bestPenalties;
-    }
-
-    /**
-     * To use it, you should first call `calc` method.
-     *
-     * @return List with duration of each iteration
-     */
-    public ArrayList<Long> getIterationTimes() {
-        return iterationTimes;
     }
 
     /**
