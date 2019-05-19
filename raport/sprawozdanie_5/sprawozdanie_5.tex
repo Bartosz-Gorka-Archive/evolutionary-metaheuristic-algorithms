@@ -21,7 +21,7 @@
 \maketitle
 
 \section{Opis etapu projektu}
-Celem kolejnego etapu projektu było wyznaczenie statystyk i analizacja potencjalnej korelacji między jakością rozwiązań a ich podobieństwiem.
+Celem kolejnego etapu projektu było wyznaczenie statystyk i analiza potencjalnej korelacji między jakością rozwiązań a ich podobieństwem.
 
 Liczba grup, funkcja celu oraz instancja testowa pozostały niezmienne.
 
@@ -39,7 +39,9 @@ Na wykresie \ref{wykres:podobienstwo-do-najlepszego} przedstawiono podobieństwo
 
 W przypadku wykresu \ref{wykres:podobienstwo-do-wszystkich} mamy do czynienia z podobieństwem pomiędzy rozwiązaniem i wszystkimi pozostałymi rozwiązaniami. Prezentuje on w jeszcze wyraźniejszy sposób korelację wskazaną przy analizie poprzedniego wykresu.
 
-Podsumowując analizę, możemy dojść do wniosku że \textbf{podobieństwo pomiędzy rozwiązaniami ma wpływ na wartość funkcji celu i odwrotnie}. Rozwiązania wykazujące wysokie podobieństwo w swojej budowie (przydziale punktów do grup) będą osiągały zbliżone do siebie wartości funkcji celu. Podobnie uzyskanie przez rozwiązanie zbliżonej do innych rozwiązań wartości funkcji celu wpływa na wysokie podobieństwo między rozwiązaniami.
+Podsumowując analizę, możemy dojść do wniosku, że \textbf{podobieństwo pomiędzy rozwiązaniami ma wpływ na wartość funkcji celu i odwrotnie}. Rozwiązania wykazujące wysokie podobieństwo w swojej budowie (przydziale punktów do grup) będą osiągały zbliżone do siebie wartości funkcji celu. Podobnie uzyskanie przez rozwiązanie zbliżonej do innych rozwiązań wartości funkcji celu wpływa na wysokie podobieństwo między rozwiązaniami.
+
+Korzystając z języka programowania \textttt{Python} oraz pakietu \texttt{scipy} wyznaczono wartość współczynnika korelacji liniowej Pearsona dla obydwu przypadków. Dla porównania z najlepszym rozwiązaniem otrzymano wartość \textit{-0.832}, natomiast dla porównania ze wszystkimi \textit{-0.882}.
 
 \begin{figure}[H]
     \centering
