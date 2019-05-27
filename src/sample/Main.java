@@ -42,6 +42,7 @@ public class Main extends Application {
      */
     private final static int CANDIDATES_NUMBER = 10;
     private final static int MSLS_LS_ITERATIONS = 100;
+    private final static int EVOLUTIONARY_CACHE_SIZE = 15;
     /**
      * Mode - Greedy when 0 else Steepest
      */
@@ -353,8 +354,7 @@ public class Main extends Application {
              */
             if (EXECUTE_EVOLUTIONARY) {
                 startTime = System.nanoTime();
-                // TODO Evolutionary
-                IteratedLocalSearch solver = new IteratedLocalSearch(randomInstances, IteratedLocalSearch.MODE.BIG_HEURISTIC);
+                EvolutionaryAlgorithm solver = new EvolutionaryAlgorithm(coordinates, startIndexesList, EVOLUTIONARY_CACHE_SIZE);
                 solver.run(distanceMatrix, search_time_limit);
                 EvolutionaryResults[iteration] = solver.getBestPenalties();
                 if (solver.getBestPenalties() < bestEvolutionaryResult) {
