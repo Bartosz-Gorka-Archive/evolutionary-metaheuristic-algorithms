@@ -16,7 +16,7 @@ public class Main extends Application {
     /**
      * Number of iterations in test stage
      */
-    private final static int TESTS_NUMBER = 500;
+    private final static int TESTS_NUMBER = 10;
     /**
      * Should we show extra logs and statistics?
      */
@@ -25,22 +25,24 @@ public class Main extends Application {
      * Should we use following algorithms?
      */
     private final static boolean EXECUTE_GREEDY_NAIVE = false;
-    private final static boolean EXECUTE_GREEDY_RANDOM = true;
+    private final static boolean EXECUTE_GREEDY_RANDOM = false;
     private final static boolean EXECUTE_STEEPEST_NAIVE = false;
     private final static boolean EXECUTE_STEEPEST_RANDOM = false;
     private final static boolean EXECUTE_STEEPEST_CANDIDATE = false;
     private final static boolean EXECUTE_STEEPEST_CANDIDATE_CACHE = false;
     private final static boolean EXECUTE_STEEPEST_CACHE = false;
-    private final static boolean EXECUTE_MSLS = false;
+    private final static boolean EXECUTE_MSLS = true;
     private final static boolean EXECUTE_ILS_SMALL_PERTURBATION = false;
     private final static boolean EXECUTE_ILS_BIG_PERTURBATION = false;
-    private final static boolean CALCULATE_STAT_QUALITY_SIMILARITY = true;
+    private final static boolean CALCULATE_STAT_QUALITY_SIMILARITY = false;
+    private final static boolean EXECUTE_EVOLUTIONARY = true;
 
     /**
      * How many candidates we chose in steepest naive candidates algorithm
      */
     private final static int CANDIDATES_NUMBER = 10;
     private final static int MSLS_LS_ITERATIONS = 100;
+    private final static int EVOLUTIONARY_CACHE_SIZE = 15;
     /**
      * Mode - Greedy when 0 else Steepest
      */
@@ -107,6 +109,8 @@ public class Main extends Application {
         HashSet<ArrayList<PointsPath>> bestILSBigPerturbationGroupsConnections = new HashSet<>();
         HashSet<ArrayList<PointsPath>> bestILSBigHeuristicPerturbationGroupsMST = new HashSet<>();
         HashSet<ArrayList<PointsPath>> bestILSBigHeuristicPerturbationGroupsConnections = new HashSet<>();
+        HashSet<ArrayList<PointsPath>> bestEvolutionaryGroupsMST = new HashSet<>();
+        HashSet<ArrayList<PointsPath>> bestEvolutionaryGroupsConnections = new HashSet<>();
 
         List<int[]> randomGreedySolutionsList = new ArrayList<>();
         int[] bestGreedySolution = new int[coordinates.size()];
@@ -122,14 +126,15 @@ public class Main extends Application {
                 ILSSmallPerturbationTimes = new double[TESTS_NUMBER], ILSSmallPerturbationResults = new double[TESTS_NUMBER],
                 ILSBigPerturbationTimes = new double[TESTS_NUMBER], ILSBigPerturbationResults = new double[TESTS_NUMBER],
                 ILSBigHeuristicPerturbationTimes = new double[TESTS_NUMBER], ILSBigHeuristicPerturbationResults = new double[TESTS_NUMBER],
-                MSLSTimes = new double[TESTS_NUMBER], MSLSResults = new double[TESTS_NUMBER];
+                MSLSTimes = new double[TESTS_NUMBER], MSLSResults = new double[TESTS_NUMBER],
+                EvolutionaryTimes = new double[TESTS_NUMBER], EvolutionaryResults = new double[TESTS_NUMBER];
 
         double bestNaiveGreedyResult = Double.MAX_VALUE, bestRandomGreedyResult = Double.MAX_VALUE,
                 bestNaiveSteepestResult = Double.MAX_VALUE, bestRandomSteepestResult = Double.MAX_VALUE,
                 bestNaiveSteepestCandidateResult = Double.MAX_VALUE, bestNaiveSteepestCacheResult = Double.MAX_VALUE,
                 bestNaiveSteepestCandidateCacheResult = Double.MAX_VALUE, bestMSLSResult = Double.MAX_VALUE,
                 bestILSSmallPerturbationResult = Double.MAX_VALUE, bestILSBigPerturbationResult = Double.MAX_VALUE,
-                bestILSBigHeuristicPerturbationResult = Double.MAX_VALUE;
+                bestILSBigHeuristicPerturbationResult = Double.MAX_VALUE, bestEvolutionaryResult = Double.MAX_VALUE;
 
         // Using for statistics
         long startTime;
@@ -282,9 +287,9 @@ public class Main extends Application {
             /*
              * MSLS
              */
-            long iterated_local_search_time_limit = (long) (30.0 * 1_000_000_000.0);
+            long search_time_limit = (long) (30.0 * 1_000_000_000.0);
             if (EXECUTE_MSLS) {
-                iterated_local_search_time_limit = System.nanoTime();
+                search_time_limit = System.nanoTime();
                 startTime = System.nanoTime();
                 MSLS msls = new MSLS(MSLS_MODE, MSLS_LS_ITERATIONS, startIndexesList, distanceMatrix, coordinates);
                 msls.run();
@@ -297,7 +302,7 @@ public class Main extends Application {
                 }
 
                 MSLSTimes[iteration] = System.nanoTime() - startTime;
-                iterated_local_search_time_limit = System.nanoTime() - iterated_local_search_time_limit;
+                search_time_limit = System.nanoTime() - search_time_limit;
             }
             /*
              * Iterated Local Search with small perturbation
@@ -305,7 +310,7 @@ public class Main extends Application {
             if (EXECUTE_ILS_SMALL_PERTURBATION) {
                 startTime = System.nanoTime();
                 IteratedLocalSearch iteratedLocalSolver = new IteratedLocalSearch(randomInstances, IteratedLocalSearch.MODE.SMALL);
-                iteratedLocalSolver.run(distanceMatrix, iterated_local_search_time_limit);
+                iteratedLocalSolver.run(distanceMatrix, search_time_limit);
                 ILSSmallPerturbationResults[iteration] = iteratedLocalSolver.getBestPenalties();
                 if (iteratedLocalSolver.getBestPenalties() < bestILSSmallPerturbationResult) {
                     bestILSSmallPerturbationResult = iteratedLocalSolver.getBestPenalties();
@@ -320,7 +325,7 @@ public class Main extends Application {
             if (EXECUTE_ILS_BIG_PERTURBATION) {
                 startTime = System.nanoTime();
                 IteratedLocalSearch iteratedLocalSolver = new IteratedLocalSearch(randomInstances, IteratedLocalSearch.MODE.BIG_RANDOM);
-                iteratedLocalSolver.run(distanceMatrix, iterated_local_search_time_limit);
+                iteratedLocalSolver.run(distanceMatrix, search_time_limit);
                 ILSBigPerturbationResults[iteration] = iteratedLocalSolver.getBestPenalties();
                 if (iteratedLocalSolver.getBestPenalties() < bestILSBigPerturbationResult) {
                     bestILSBigPerturbationResult = iteratedLocalSolver.getBestPenalties();
@@ -335,7 +340,7 @@ public class Main extends Application {
             if (EXECUTE_ILS_BIG_PERTURBATION) {
                 startTime = System.nanoTime();
                 IteratedLocalSearch iteratedLocalSolver = new IteratedLocalSearch(randomInstances, IteratedLocalSearch.MODE.BIG_HEURISTIC);
-                iteratedLocalSolver.run(distanceMatrix, iterated_local_search_time_limit);
+                iteratedLocalSolver.run(distanceMatrix, search_time_limit);
                 ILSBigHeuristicPerturbationResults[iteration] = iteratedLocalSolver.getBestPenalties();
                 if (iteratedLocalSolver.getBestPenalties() < bestILSBigHeuristicPerturbationResult) {
                     bestILSBigHeuristicPerturbationResult = iteratedLocalSolver.getBestPenalties();
@@ -343,6 +348,21 @@ public class Main extends Application {
                     bestILSBigHeuristicPerturbationGroupsConnections = castLocalSearchToConnectionGraph(iteratedLocalSolver.getBestGroups(), distanceMatrix);
                 }
                 ILSBigHeuristicPerturbationTimes[iteration] = System.nanoTime() - startTime;
+            }
+            /*
+             * Evolutionary algorithm
+             */
+            if (EXECUTE_EVOLUTIONARY) {
+                startTime = System.nanoTime();
+                EvolutionaryAlgorithm solver = new EvolutionaryAlgorithm(coordinates, startIndexesList, EVOLUTIONARY_CACHE_SIZE, GROUPS);
+                solver.run(distanceMatrix, search_time_limit);
+                EvolutionaryResults[iteration] = solver.getBestPenalties();
+                if (solver.getBestPenalties() < bestEvolutionaryResult) {
+                    bestEvolutionaryResult = solver.getBestPenalties();
+                    bestEvolutionaryGroupsMST = castLocalSearchToMSTGraph(solver.getBestGroups(), distanceMatrix);
+                    bestEvolutionaryGroupsConnections = castLocalSearchToConnectionGraph(solver.getBestGroups(), distanceMatrix);
+                }
+                EvolutionaryTimes[iteration] = System.nanoTime() - startTime;
             }
         }
 
@@ -451,6 +471,12 @@ public class Main extends Application {
             new Drawer().drawInputInstance(coordinates, bestILSBigHeuristicPerturbationGroupsConnections, "ILS big heuristic perturbation", false, true);
         }
 
+        if (EXECUTE_EVOLUTIONARY) {
+            new Drawer().drawInputInstance(coordinates, bestEvolutionaryGroupsMST, "Evolutionary", true, true);
+            new Drawer().drawInputInstance(coordinates, bestEvolutionaryGroupsMST, "Evolutionary", true, false);
+            new Drawer().drawInputInstance(coordinates, bestEvolutionaryGroupsConnections, "Evolutionary", false, true);
+        }
+
         if (SHOW_STATISTICS) {
             if (EXECUTE_GREEDY_NAIVE)
                 System.out.println("Min result for naive greedy = " + bestNaiveGreedyResult);
@@ -474,6 +500,8 @@ public class Main extends Application {
                 System.out.println("Min result for ILS big random perturbation = " + bestILSBigPerturbationResult);
             if (EXECUTE_ILS_BIG_PERTURBATION)
                 System.out.println("Min result for ILS big heuristic perturbation = " + bestILSBigHeuristicPerturbationResult);
+            if (EXECUTE_EVOLUTIONARY)
+                System.out.println("Min result for Evolutionary = " + bestEvolutionaryResult);
 
             if (EXECUTE_GREEDY_NAIVE)
                 System.out.println("Mean result for naive greedy = " + Arrays.stream(naiveGreedyResults).average().getAsDouble());
@@ -497,6 +525,8 @@ public class Main extends Application {
                 System.out.println("Mean result for ILS big random perturbation = " + Arrays.stream(ILSBigPerturbationResults).average().getAsDouble());
             if (EXECUTE_ILS_BIG_PERTURBATION)
                 System.out.println("Mean result for ILS big heuristic perturbation = " + Arrays.stream(ILSBigHeuristicPerturbationResults).average().getAsDouble());
+            if (EXECUTE_EVOLUTIONARY)
+                System.out.println("Mean result for Evolutionary = " + Arrays.stream(EvolutionaryResults).average().getAsDouble());
 
             if (EXECUTE_GREEDY_NAIVE)
                 System.out.println("Max result for naive greedy = " + Arrays.stream(naiveGreedyResults).max().getAsDouble());
@@ -520,6 +550,8 @@ public class Main extends Application {
                 System.out.println("Max result for ILS big random perturbation = " + Arrays.stream(ILSBigPerturbationResults).max().getAsDouble());
             if (EXECUTE_ILS_BIG_PERTURBATION)
                 System.out.println("Max result for ILS big heuristic perturbation = " + Arrays.stream(ILSBigHeuristicPerturbationResults).max().getAsDouble());
+            if (EXECUTE_EVOLUTIONARY)
+                System.out.println("Max result for Evolutionary = " + Arrays.stream(EvolutionaryResults).max().getAsDouble());
 
             System.out.println("TIMING:");
             if (EXECUTE_GREEDY_NAIVE)
@@ -544,6 +576,8 @@ public class Main extends Application {
                 System.out.println("Min time for ILS big random perturbation = " + Arrays.stream(ILSBigPerturbationTimes).min().getAsDouble() / 1_000_000_000.0);
             if (EXECUTE_ILS_BIG_PERTURBATION)
                 System.out.println("Min time for ILS big heuristic perturbation = " + Arrays.stream(ILSBigHeuristicPerturbationTimes).min().getAsDouble() / 1_000_000_000.0);
+            if (EXECUTE_EVOLUTIONARY)
+                System.out.println("Min time for Evolutionary = " + Arrays.stream(EvolutionaryTimes).min().getAsDouble() / 1_000_000_000.0);
 
             if (EXECUTE_GREEDY_NAIVE)
                 System.out.println("Mean time for naive greedy = " + Arrays.stream(naiveGreedyTimes).average().getAsDouble() / 1_000_000_000.0);
@@ -567,6 +601,8 @@ public class Main extends Application {
                 System.out.println("Mean time for ILS big random perturbation = " + Arrays.stream(ILSBigPerturbationTimes).average().getAsDouble() / 1_000_000_000.0);
             if (EXECUTE_ILS_BIG_PERTURBATION)
                 System.out.println("Mean time for ILS big heuristic perturbation = " + Arrays.stream(ILSBigHeuristicPerturbationTimes).average().getAsDouble() / 1_000_000_000.0);
+            if (EXECUTE_EVOLUTIONARY)
+                System.out.println("Mean time for Evolutionary = " + Arrays.stream(EvolutionaryTimes).average().getAsDouble() / 1_000_000_000.0);
 
             if (EXECUTE_GREEDY_NAIVE)
                 System.out.println("Max time for naive greedy = " + Arrays.stream(naiveGreedyTimes).max().getAsDouble() / 1_000_000_000.0);
@@ -590,6 +626,8 @@ public class Main extends Application {
                 System.out.println("Max time for ILS big random perturbation = " + Arrays.stream(ILSBigPerturbationTimes).max().getAsDouble() / 1_000_000_000.0);
             if (EXECUTE_ILS_BIG_PERTURBATION)
                 System.out.println("Max time for ILS big heuristic perturbation = " + Arrays.stream(ILSBigHeuristicPerturbationTimes).max().getAsDouble() / 1_000_000_000.0);
+            if (EXECUTE_EVOLUTIONARY)
+                System.out.println("Max time for Evolutionary = " + Arrays.stream(EvolutionaryTimes).max().getAsDouble() / 1_000_000_000.0);
         }
     }
 
