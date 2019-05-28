@@ -354,7 +354,7 @@ public class Main extends Application {
              */
             if (EXECUTE_EVOLUTIONARY) {
                 startTime = System.nanoTime();
-                EvolutionaryAlgorithm solver = new EvolutionaryAlgorithm(coordinates, startIndexesList, EVOLUTIONARY_CACHE_SIZE);
+                EvolutionaryAlgorithm solver = new EvolutionaryAlgorithm(coordinates, startIndexesList, EVOLUTIONARY_CACHE_SIZE, GROUPS);
                 solver.run(distanceMatrix, search_time_limit);
                 EvolutionaryResults[iteration] = solver.getBestPenalties();
                 if (solver.getBestPenalties() < bestEvolutionaryResult) {
